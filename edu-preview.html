@@ -289,7 +289,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f8faff;color:var(--text
 .login-btn.danger{background:#ef4444}
 .login-btn.danger:hover{background:#dc2626}
 /* user pill in topbar */
-.user-pill{background:rgba(255,255,255,.2);border-radius:20px;padding:.3rem .9rem;font-size:.85rem;font-weight:700;color:white}
+.user-pill{background:rgba(255,255,255,.2);border-radius:20px;padding:.25rem .75rem;font-size:.85rem;font-weight:700;color:white;display:flex;align-items:center;gap:.35rem}
+.user-pill .up-avatar{font-size:1.3rem;line-height:1}
+/* Avatar picker in registration */
+.avatar-picker-label{font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:.4rem}
+.avatar-grid{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:1rem}
+.avatar-opt{font-size:1.9rem;cursor:pointer;border-radius:10px;padding:.3rem .4rem;border:3px solid transparent;transition:all .15s;background:#f8faff;line-height:1}
+.avatar-opt:hover{background:var(--blue-light);border-color:#4f46e5}
+.avatar-opt.selected{background:var(--blue-light);border-color:#4f46e5;transform:scale(1.15)}
 .topbar-login .streak-pill,.topbar-login .top-score,.topbar-login .progress-nav-btn,.topbar-login #userPill,.topbar-login #switchUserBtn{display:none}
 
 /* ── ANIMAL SOUND CARDS ── */
@@ -572,9 +579,9 @@ function verifyPin(username, pin){
   return loadUsers().some(u => u.username === username && u.pin === pin);
 }
 
-function addUser(username, fullName, dob, pin, email='', recoveryKey=''){
+function addUser(username, fullName, dob, pin, avatar='🐶', email='', recoveryKey=''){
   const users = loadUsers();
-  users.push({ username, fullName, dob, pin, email, recoveryKey, created: new Date().toISOString().split('T')[0] });
+  users.push({ username, fullName, dob, pin, avatar, email, recoveryKey, created: new Date().toISOString().split('T')[0] });
   saveUsers(users);
 }
 
@@ -613,7 +620,8 @@ function updateTopBarUser(){
   const users = loadUsers();
   const u = users.find(x => x.username === activeUser);
   const pill = document.getElementById('userPill');
-  if(pill) pill.textContent = '👤 ' + (u ? u.username : activeUser);
+  const av = u?.avatar || '👤';
+  if(pill) pill.innerHTML = `<span class="up-avatar">${av}</span>${u ? u.username : activeUser}`;
   document.getElementById('mainTopbar').style.display = 'flex';
 }
 
@@ -630,8 +638,7 @@ function renderLoginScreen(mode, extra){
   if(mode === 'select'){
     const users = loadUsers().filter(u => u.username !== '__parent');
     const cards = users.map(u => {
-      const avatars = ['🐶','🐱','🦊','🐸','🦁','🐨','🐼','🐰','🦋','🐳'];
-      const av = avatars[u.username.charCodeAt(0) % avatars.length];
+      const av = u.avatar || '🐶';
       return `<div class="user-card-btn" onclick="startPinEntry('${u.username}')">
         <div class="uc-avatar">${av}</div>
         <div class="uc-name">${u.username}</div>
@@ -669,6 +676,10 @@ function renderLoginScreen(mode, extra){
       <input class="login-input" id="regName" placeholder="Child\'s first name" maxlength="20"/>
       <input class="login-input" id="regFullName" placeholder="Full name (for reports)" maxlength="50"/>
       <input class="login-input" id="regDob" type="date" placeholder="Date of birth"/>
+      <div class="avatar-picker-label">Pick your avatar</div>
+      <div class="avatar-grid" id="avatarGrid">
+        ${['🐶','🐱','🦊','🐸','🦁','🐨','🐼','🐰','🦋','🐳','🦄','🐯','🐮','🐧','🦕','🦖','🐺','🦔','🐻','🐙'].map((a,i)=>`<span class="avatar-opt${i===0?' selected':''}" data-av="${a}" onclick="selectAvatar(this)">${a}</span>`).join('')}
+      </div>
       <input class="login-input" id="regPin" type="password" placeholder="Choose a 4-digit PIN" maxlength="4" inputmode="numeric"/>
       <input class="login-input" id="regPin2" type="password" placeholder="Confirm PIN" maxlength="4" inputmode="numeric"/>
       <div class="pin-error" id="regError"></div>
@@ -817,6 +828,11 @@ function loginAs(username){
   initDailyChallenge();
 }
 
+function selectAvatar(el){
+  document.querySelectorAll('.avatar-opt').forEach(a=>a.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
 function submitRegistration(isLegacy){
   const name     = document.getElementById('regName').value.trim();
   const fullName = document.getElementById('regFullName').value.trim();
@@ -825,12 +841,13 @@ function submitRegistration(isLegacy){
   const pin2     = document.getElementById('regPin2').value;
   const err      = document.getElementById('regError');
 
+  const avatar = document.querySelector('.avatar-opt.selected')?.dataset.av || '🐶';
   if(!name){ err.textContent='Please enter a name.'; return; }
   if(!/^\d{4}$/.test(pin)){ err.textContent='PIN must be exactly 4 digits.'; return; }
   if(pin !== pin2){ err.textContent='PINs do not match.'; return; }
   if(loadUsers().some(u=>u.username.toLowerCase()===name.toLowerCase())){ err.textContent='That name is already taken.'; return; }
 
-  addUser(name, fullName || name, dob, pin);
+  addUser(name, fullName || name, dob, pin, avatar);
 
   // legacy migration
   if(isLegacy){
