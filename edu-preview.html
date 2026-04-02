@@ -28,6 +28,10 @@
 }
 html{scroll-behavior:smooth}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#c7d2fe;border-radius:100px}
+::-webkit-scrollbar-thumb:hover{background:#818cf8}
 
 /* ── AI TUTOR ── */
 #ai-tutor-btn{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(79,70,229,.5);display:flex;align-items:center;justify-content:center;font-size:1.6rem;transition:transform .2s,box-shadow .2s}
@@ -63,7 +67,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 .tutor-setup a{color:#7c3aed;font-weight:700}
 
 /* ── TOP BAR ── */
-.topbar{background:rgba(79,70,229,.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:white;padding:.65rem 1.5rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 0 rgba(255,255,255,.08),0 4px 24px rgba(79,70,229,.35);position:sticky;top:0;z-index:100}
+.topbar{background:rgba(49,46,129,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:white;padding:.65rem 1.5rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 0 rgba(255,255,255,.07),0 4px 28px rgba(49,46,129,.45);position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,.08)}
 .logo{font-size:1.4rem;font-weight:900;letter-spacing:-.3px}
 .logo span{color:#fbbf24}
 .top-score{background:rgba(255,255,255,.15);border-radius:100px;padding:.25rem .85rem;font-size:.82rem;font-weight:700;border:1px solid rgba(255,255,255,.2)}
@@ -76,7 +80,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 #screen-home{padding:3rem 1rem 2rem;text-align:center}
 #screen-dashboard{padding:1.5rem 1rem}
 .home-hero h1{font-size:clamp(1.9rem,5vw,2.9rem);font-weight:900;background:linear-gradient(135deg,var(--brand),var(--brand-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.5rem;letter-spacing:-.5px}
-.home-hero p{font-size:1.05rem;color:var(--muted);margin-bottom:2rem;font-weight:500}
+.home-hero p{font-size:1.05rem;color:var(--muted);margin-bottom:1.5rem;font-weight:500}
+.home-actions{display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap;margin-bottom:1.75rem}
+.home-action-btn{background:var(--brand);color:white;border:none;border-radius:100px;padding:.55rem 1.4rem;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(79,70,229,.3);font-family:inherit}
+.home-action-btn:hover{background:var(--brand-dark);transform:translateY(-2px);box-shadow:0 6px 20px rgba(79,70,229,.4)}
+.home-action-btn.outline{background:white;color:var(--brand);border:2px solid var(--brand);box-shadow:none}
+.home-action-btn.outline:hover{background:#eef2ff;transform:translateY(-2px)}
 .age-cards{display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem;max-width:880px;margin:0 auto}
 .age-card{background:white;border-radius:22px;padding:2rem 2.25rem;box-shadow:var(--shadow-md);cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;width:340px;text-align:left;border:2px solid transparent;position:relative;overflow:hidden}
 .age-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s;pointer-events:none}
@@ -108,15 +117,16 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 /* ── DASHBOARD ── */
 #screen-dashboard{padding:2rem 1rem}
 .dash-header{display:flex;align-items:center;gap:1rem;margin-bottom:2rem}
-.back-btn{background:white;border:1.5px solid var(--border);border-radius:10px;padding:.4rem .9rem;cursor:pointer;font-weight:600;color:var(--muted);font-size:.87rem;box-shadow:var(--shadow-sm);transition:all .2s}
+.back-btn{background:white;border:1.5px solid var(--border);border-radius:100px;padding:.4rem 1rem;cursor:pointer;font-weight:600;color:var(--muted);font-size:.87rem;box-shadow:var(--shadow-sm);transition:all .2s;font-family:inherit}
 .back-btn:hover{border-color:var(--brand);color:var(--brand);background:#f5f3ff;transform:translateY(-1px)}
 .dash-header h2{font-size:1.55rem;font-weight:800;letter-spacing:-.3px}
 .subject-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1.1rem;max-width:980px;margin:0 auto}
-.subject-card{background:white;border-radius:var(--radius);padding:1.4rem;cursor:pointer;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;box-shadow:var(--shadow-sm);border:1.5px solid var(--border);border-top:4px solid transparent}
-.subject-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--border)}
-.subject-card .s-icon{font-size:2.25rem;margin-bottom:.65rem;display:block}
+.subject-card{background:white;border-radius:var(--radius);padding:1.4rem;cursor:pointer;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s,border-color .2s;box-shadow:var(--shadow-sm);border:1.5px solid var(--border);border-top:4px solid transparent}
+.subject-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md)}
+.subject-card .s-icon{font-size:2.25rem;margin-bottom:.65rem;display:block;transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+.subject-card:hover .s-icon{transform:scale(1.18) rotate(-4deg)}
 .subject-card h3{font-size:1rem;font-weight:700;margin-bottom:.25rem;letter-spacing:-.1px}
-.subject-card p{font-size:.82rem;color:var(--muted);font-weight:450}
+.subject-card p{font-size:.82rem;color:var(--muted);font-weight:450;line-height:1.5}
 .subject-card .progress-bar{height:5px;background:#f1f5f9;border-radius:100px;margin-top:.75rem;overflow:hidden}
 .subject-card .progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--green),#34d399);width:0%;transition:width .8s}
 
@@ -127,13 +137,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 .lesson-badge{border-radius:100px;padding:.3rem .9rem;font-size:.78rem;font-weight:700}
 
 /* Lesson content */
-.lesson-section{background:white;border-radius:var(--radius);padding:1.75rem;margin-bottom:1.1rem;box-shadow:var(--shadow-sm);border:1.5px solid var(--border)}
+.lesson-section{background:white;border-radius:var(--radius);padding:1.75rem;margin-bottom:1.1rem;box-shadow:var(--shadow-sm);border:1.5px solid var(--border);transition:border-color .2s,box-shadow .2s}
+.lesson-section:hover{border-color:#c7d2fe;box-shadow:var(--shadow-md)}
 .lesson-section h3{font-size:1.15rem;font-weight:800;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;letter-spacing:-.1px}
-.lesson-section p{line-height:1.8;color:#334155;margin-bottom:.75rem;font-size:.95rem}
+.lesson-section p{line-height:1.85;color:#334155;margin-bottom:.75rem;font-size:.95rem}
 .lesson-section p:last-child{margin-bottom:0}
 
 /* Fun fact box */
-.fun-fact{background:linear-gradient(135deg,#fffbeb,#fff7ed);border-left:3px solid var(--yellow);border-radius:12px;padding:1rem 1.25rem;margin:1rem 0;font-size:.93rem;box-shadow:0 2px 8px rgba(245,158,11,.1)}
+.fun-fact{background:linear-gradient(135deg,#fffbeb,#fff7ed);border-left:4px solid var(--yellow);border-radius:12px;padding:1rem 1.25rem;margin:1rem 0;font-size:.93rem;box-shadow:0 2px 10px rgba(245,158,11,.12);line-height:1.7}
 .fun-fact strong{color:#92400e}
 
 /* Visual aids */
@@ -144,14 +155,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 
 /* ── QUIZ ── */
 .quiz-card{background:white;border-radius:var(--radius);padding:1.75rem;box-shadow:var(--shadow-sm);margin-bottom:1.1rem;border:1.5px solid var(--border)}
-.quiz-card h3{font-size:1.05rem;font-weight:800;margin-bottom:1.25rem;color:var(--brand)}
+.quiz-card h3{font-size:.78rem;font-weight:800;margin-bottom:1.25rem;color:var(--brand);text-transform:uppercase;letter-spacing:.08em}
 .quiz-progress{height:6px;background:#f1f5f9;border-radius:100px;margin-bottom:1.25rem;overflow:hidden}
 .quiz-progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--brand),var(--brand-2));transition:width .4s cubic-bezier(.4,0,.2,1)}
 .question-text{font-size:1.02rem;font-weight:700;margin-bottom:1.25rem;line-height:1.55;color:var(--text)}
 .question-emoji{font-size:2.4rem;margin-bottom:.65rem;display:block}
 .options{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
-.option-btn{background:#f8faff;border:1.5px solid var(--border);border-radius:12px;padding:.75rem 1rem;font-size:.92rem;font-weight:600;cursor:pointer;transition:all .18s;text-align:left;color:var(--text)}
-.option-btn:hover:not(:disabled){border-color:var(--brand);background:#eef2ff;color:var(--brand);transform:translateY(-1px)}
+.option-btn{background:#f8faff;border:1.5px solid var(--border);border-radius:12px;padding:.78rem 1rem;font-size:.92rem;font-weight:600;cursor:pointer;transition:all .18s;text-align:left;color:var(--text);line-height:1.4;font-family:inherit}
+.option-btn:hover:not(:disabled){border-color:var(--brand);background:#eef2ff;color:var(--brand);transform:translateY(-2px);box-shadow:0 3px 12px rgba(79,70,229,.12)}
 .option-btn.correct{background:var(--green-light);border-color:var(--green);color:#065f46}
 .option-btn.wrong{background:var(--red-light);border-color:var(--red);color:#7f1d1d}
 .option-btn:disabled{cursor:default}
@@ -228,7 +239,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 
 /* ── SCREEN TOGGLE ── */
 .screen{display:none}
-.screen.active{display:block}
+@keyframes screenIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.screen.active{display:block;animation:screenIn .22s ease forwards}
+#screen-login.active{animation:screenIn .3s ease forwards}
 
 /* ── WORKSHEET PRINT ── */
 @media print{
@@ -252,31 +265,47 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
   .logo{font-size:1.2rem}
   .top-right{flex-wrap:wrap;gap:.3rem}
   .top-score,.streak-pill,.progress-nav-btn{font-size:.75rem;padding:.2rem .6rem}
+  .daily-challenge{padding:.85rem 1rem;gap:.75rem}
+  .dc-icon{font-size:1.6rem}
+  .subject-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem}
+  .lesson-section{padding:1.25rem}
+  #screen-lesson{padding:1rem .75rem}
+  .home-hero h1{margin-bottom:.4rem}
+  .stat-card{padding:1.1rem}
+  .stat-card .stat-val{font-size:2rem}
+}
+@media(max-width:420px){
+  .streak-pill,.top-score{display:none}
 }
 
 /* ── PROGRESS SCREEN ── */
+.progress-header{display:flex;align-items:center;gap:1rem;margin-bottom:2rem}
+.progress-header h2{font-size:1.6rem;font-weight:900;letter-spacing:-.3px}
 .progress-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem}
-.stat-card{background:white;border-radius:var(--radius);padding:1.5rem;text-align:center;box-shadow:var(--shadow-sm);border:1.5px solid var(--border)}
+.stat-card{background:white;border-radius:var(--radius);padding:1.5rem;text-align:center;box-shadow:var(--shadow-sm);border:1.5px solid var(--border);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--brand),var(--brand-2))}
 .stat-card .stat-val{font-size:2.4rem;font-weight:900;background:linear-gradient(135deg,var(--brand),var(--brand-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .stat-card .stat-label{font-size:.83rem;color:var(--muted);font-weight:600;margin-top:.25rem}
 .badges-grid{display:flex;flex-wrap:wrap;gap:.7rem;margin:1rem 0}
-.badge-item{border-radius:12px;padding:.7rem 1.2rem;display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:.88rem}
-.badge-item.earned{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#78350f;box-shadow:0 2px 8px rgba(251,191,36,.25)}
+.badge-item{border-radius:14px;padding:.75rem 1.2rem;display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:.88rem;transition:transform .18s}
+.badge-item.earned{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#78350f;box-shadow:0 3px 10px rgba(251,191,36,.3)}
+.badge-item.earned:hover{transform:translateY(-2px)}
 .badge-item.locked{background:#f1f5f9;color:#94a3b8;filter:grayscale(1)}
 .lesson-progress-list{display:grid;gap:.55rem;margin:1rem 0}
-.lesson-prog-item{background:white;border-radius:12px;padding:.85rem 1.25rem;display:flex;align-items:center;gap:.75rem;box-shadow:var(--shadow-sm);border:1.5px solid var(--border)}
+.lesson-prog-item{background:white;border-radius:12px;padding:.85rem 1.25rem;display:flex;align-items:center;gap:.75rem;box-shadow:var(--shadow-sm);border:1.5px solid var(--border);transition:border-color .2s}
+.lesson-prog-item:hover{border-color:#c7d2fe}
 .lesson-prog-item .lp-icon{font-size:1.4rem}
 .lesson-prog-item .lp-name{flex:1;font-weight:700;font-size:.93rem}
 .lesson-prog-item .lp-score{font-size:.83rem;color:var(--muted)}
 .lesson-prog-item .lp-check{font-size:1.2rem}
-.section-heading{font-size:1.05rem;font-weight:800;color:var(--brand);margin:1.5rem 0 .5rem;letter-spacing:-.1px}
+.section-heading{font-size:1rem;font-weight:800;color:var(--brand);margin:1.75rem 0 .6rem;letter-spacing:.04em;text-transform:uppercase;font-size:.78rem}
 
 /* ── CONFETTI ── */
 .confetti-piece{position:fixed;width:10px;height:10px;top:-10px;border-radius:2px;pointer-events:none;z-index:9999;animation:confetti-fall linear forwards}
 @keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
 
 /* ── BADGE TOAST ── */
-.badge-toast{position:fixed;top:80px;right:1.5rem;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:white;padding:1rem 1.5rem;border-radius:16px;font-weight:700;box-shadow:0 8px 32px rgba(79,70,229,.45);transform:translateX(200%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:1000;max-width:280px}
+.badge-toast{position:fixed;top:5rem;right:1.5rem;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:white;padding:1rem 1.5rem;border-radius:16px;font-weight:700;box-shadow:0 8px 32px rgba(79,70,229,.45);transform:translateX(200%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:1000;max-width:280px}
 .badge-toast.show{transform:translateX(0)}
 .badge-toast .bt-title{font-size:.73rem;opacity:.8;text-transform:uppercase;letter-spacing:1px}
 .badge-toast .bt-badge{font-size:1.1rem;margin-top:.2rem}
@@ -308,11 +337,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 .tab-content.active{display:block}
 
 /* ── LOGIN SCREEN ── */
-.login-wrap{min-height:100vh;background:linear-gradient(145deg,#312e81 0%,#4f46e5 40%,#7c3aed 75%,#6d28d9 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}
-.login-logo{font-size:2.4rem;font-weight:900;color:white;margin-bottom:.25rem;letter-spacing:-.5px}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.login-wrap{min-height:100vh;background:linear-gradient(145deg,#1e1b4b,#312e81,#4f46e5,#7c3aed,#6d28d9,#4338ca);background-size:300% 300%;animation:gradientShift 12s ease infinite;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;position:relative;overflow:hidden}
+.login-wrap::before{content:'';position:absolute;width:380px;height:380px;border-radius:50%;background:rgba(255,255,255,.05);top:-120px;right:-120px;pointer-events:none}
+.login-wrap::after{content:'';position:absolute;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.05);bottom:-80px;left:-80px;pointer-events:none}
+.login-logo{font-size:2.6rem;font-weight:900;color:white;margin-bottom:.3rem;letter-spacing:-.5px;position:relative;z-index:1;text-shadow:0 2px 20px rgba(0,0,0,.2)}
 .login-logo span{color:#fbbf24}
-.login-sub{color:rgba(255,255,255,.65);margin-bottom:2rem;font-size:.95rem;font-weight:500}
-.login-card{background:white;border-radius:22px;padding:2rem;box-shadow:0 20px 60px rgba(0,0,0,.25);width:100%;max-width:480px}
+.login-sub{color:rgba(255,255,255,.7);margin-bottom:2rem;font-size:.95rem;font-weight:500;position:relative;z-index:1;letter-spacing:.02em}
+.login-card{background:white;border-radius:24px;padding:2rem;box-shadow:0 24px 80px rgba(0,0,0,.3);width:100%;max-width:480px;position:relative;z-index:1}
 .login-card h2{font-size:1.25rem;font-weight:800;margin-bottom:1.25rem;color:var(--text);letter-spacing:-.2px}
 .user-grid{display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:1rem}
 .user-card-btn{background:#f8faff;border:1.5px solid var(--border);border-radius:14px;padding:1rem;cursor:pointer;text-align:center;flex:1;min-width:110px;transition:all .2s}
@@ -453,9 +485,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
     <div class="home-hero">
       <h1>Welcome to LearnLand! 🎉</h1>
       <p>Fun, interactive lessons for curious kids. Choose your level to get started!</p>
-      <div style="display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem">
-        <button onclick="showProgress()" style="background:#4f46e5;color:white;border:none;border-radius:20px;padding:.5rem 1.25rem;font-size:.9rem;font-weight:700;cursor:pointer">📊 My Progress</button>
-        <button onclick="openParentReport(activeUser)" style="background:white;color:#4f46e5;border:2px solid #4f46e5;border-radius:20px;padding:.5rem 1.25rem;font-size:.9rem;font-weight:700;cursor:pointer">📋 My Report</button>
+      <div class="home-actions">
+        <button onclick="showProgress()" class="home-action-btn">📊 My Progress</button>
+        <button onclick="openParentReport(activeUser)" class="home-action-btn outline">📋 My Report</button>
       </div>
     </div>
     <!-- Daily Challenge -->
@@ -547,9 +579,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 ══════════════════════════════════════════ -->
 <div id="screen-progress" class="screen">
   <div style="max-width:860px;margin:0 auto;padding:2rem 1rem">
-    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem">
+    <div class="progress-header">
       <button class="back-btn" onclick="showProgress_back()">← Back</button>
-      <h2 style="font-size:1.6rem;font-weight:900">📊 My Progress</h2>
+      <h2>📊 My Progress</h2>
     </div>
     <div id="progressContent"></div>
   </div>
