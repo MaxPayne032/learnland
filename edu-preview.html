@@ -29,6 +29,35 @@
 html{scroll-behavior:smooth}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 
+/* ── AI TUTOR ── */
+#ai-tutor-btn{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(79,70,229,.5);display:flex;align-items:center;justify-content:center;font-size:1.6rem;transition:transform .2s,box-shadow .2s}
+#ai-tutor-btn:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(79,70,229,.6)}
+#ai-tutor-btn .notif-dot{position:absolute;top:4px;right:4px;width:12px;height:12px;background:#f59e0b;border-radius:50%;border:2px solid white;display:none}
+#ai-tutor-panel{position:fixed;bottom:5.5rem;right:1.5rem;z-index:998;width:340px;max-width:calc(100vw - 2rem);background:white;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.18);display:none;flex-direction:column;overflow:hidden;border:1.5px solid #e0e7ff}
+#ai-tutor-panel.open{display:flex}
+.tutor-header{background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:.85rem 1rem;display:flex;align-items:center;gap:.6rem;color:white}
+.tutor-avatar{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.tutor-info{flex:1}
+.tutor-info strong{font-size:.95rem;display:block;font-weight:700}
+.tutor-info span{font-size:.72rem;opacity:.85}
+.tutor-close{background:none;border:none;color:white;cursor:pointer;font-size:1.2rem;padding:.2rem;opacity:.8;transition:opacity .15s}
+.tutor-close:hover{opacity:1}
+.tutor-messages{flex:1;overflow-y:auto;padding:.85rem;display:flex;flex-direction:column;gap:.6rem;max-height:340px;min-height:200px}
+.tutor-msg{max-width:85%;padding:.55rem .85rem;border-radius:14px;font-size:.85rem;line-height:1.45;animation:msgIn .2s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tutor-msg.lumi{background:#ede9fe;color:#3b0764;border-bottom-left-radius:4px;align-self:flex-start}
+.tutor-msg.user{background:#4f46e5;color:white;border-bottom-right-radius:4px;align-self:flex-end}
+.tutor-msg.typing{background:#ede9fe;align-self:flex-start;color:#7c3aed;font-style:italic}
+.tutor-input-row{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid #e5e7eb;background:#fafafa}
+.tutor-input{flex:1;border:1.5px solid #e0e7ff;border-radius:100px;padding:.45rem .9rem;font-size:.85rem;outline:none;font-family:inherit;transition:border-color .2s}
+.tutor-input:focus{border-color:#7c3aed}
+.tutor-send{background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:transform .15s;flex-shrink:0}
+.tutor-send:hover{transform:scale(1.08)}
+.tutor-key-row{padding:.4rem .7rem;background:#fafafa;border-top:1px solid #f0f0f0;display:flex;align-items:center;gap:.4rem}
+.tutor-key-input{flex:1;border:1px solid #e0e7ff;border-radius:8px;padding:.3rem .6rem;font-size:.75rem;outline:none;font-family:inherit;color:#555}
+.tutor-key-save{background:#4f46e5;color:white;border:none;border-radius:8px;padding:.3rem .7rem;font-size:.75rem;font-weight:700;cursor:pointer}
+.tutor-key-hint{font-size:.7rem;color:#9ca3af}
+
 /* ── TOP BAR ── */
 .topbar{background:rgba(79,70,229,.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:white;padding:.65rem 1.5rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 0 rgba(255,255,255,.08),0 4px 24px rgba(79,70,229,.35);position:sticky;top:0;z-index:100}
 .logo{font-size:1.4rem;font-weight:900;letter-spacing:-.3px}
@@ -7759,6 +7788,122 @@ function printWorksheet(id){
   </div>
   </body></html>`);
   win.document.close();
+}
+</script>
+
+<!-- ══ AI TUTOR ══ -->
+<button id="ai-tutor-btn" onclick="toggleTutor()" title="Ask Lumi!">🦉<span class="notif-dot" id="tutorDot"></span></button>
+
+<div id="ai-tutor-panel">
+  <div class="tutor-header">
+    <div class="tutor-avatar">🦉</div>
+    <div class="tutor-info">
+      <strong>Lumi – AI Tutor</strong>
+      <span>Always here to help you learn!</span>
+    </div>
+    <button class="tutor-close" onclick="toggleTutor()">✕</button>
+  </div>
+  <div class="tutor-messages" id="tutorMessages"></div>
+  <div class="tutor-input-row">
+    <input class="tutor-input" id="tutorInput" placeholder="Ask Lumi anything…" onkeydown="if(event.key==='Enter')sendTutorMsg()"/>
+    <button class="tutor-send" onclick="sendTutorMsg()">➤</button>
+  </div>
+  <div class="tutor-key-row" id="tutorKeyRow">
+    <span class="tutor-key-hint">🔑 Gemini API key:</span>
+    <input class="tutor-key-input" id="tutorKeyInput" type="password" placeholder="Paste free API key…"/>
+    <button class="tutor-key-save" onclick="saveTutorKey()">Save</button>
+  </div>
+</div>
+
+<script>
+// ── AI TUTOR (Gemini) ─────────────────────────────
+const TUTOR_KEY_LS = 'learnland_gemini_key';
+let tutorOpen = false;
+let tutorHistory = [];
+
+function toggleTutor(){
+  tutorOpen = !tutorOpen;
+  const panel = document.getElementById('ai-tutor-panel');
+  panel.classList.toggle('open', tutorOpen);
+  if(tutorOpen){
+    document.getElementById('tutorDot').style.display='none';
+    const msgs = document.getElementById('tutorMessages');
+    if(msgs.children.length === 0) addTutorMsg('lumi', "Hi! I'm Lumi 🦉 your learning buddy. Ask me anything — about a subject, a quiz question, or how to use the app!");
+    loadTutorKeyRow();
+    setTimeout(()=>document.getElementById('tutorInput').focus(), 100);
+  }
+}
+
+function loadTutorKeyRow(){
+  const key = localStorage.getItem(TUTOR_KEY_LS);
+  const row = document.getElementById('tutorKeyRow');
+  row.style.display = key ? 'none' : 'flex';
+}
+
+function saveTutorKey(){
+  const val = document.getElementById('tutorKeyInput').value.trim();
+  if(!val){ alert('Please paste your Gemini API key first.'); return; }
+  localStorage.setItem(TUTOR_KEY_LS, val);
+  document.getElementById('tutorKeyRow').style.display='none';
+  addTutorMsg('lumi','API key saved! I\'m ready to help you learn. Ask me anything 🎉');
+}
+
+function addTutorMsg(role, text){
+  const wrap = document.getElementById('tutorMessages');
+  const div = document.createElement('div');
+  div.className = 'tutor-msg ' + role;
+  div.textContent = text;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+  return div;
+}
+
+async function sendTutorMsg(){
+  const input = document.getElementById('tutorInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const key = localStorage.getItem(TUTOR_KEY_LS);
+  if(!key){
+    document.getElementById('tutorKeyRow').style.display='flex';
+    addTutorMsg('lumi','Please add your free Gemini API key below so I can answer you!');
+    return;
+  }
+  input.value='';
+  addTutorMsg('user', text);
+  const typing = addTutorMsg('typing','Lumi is thinking…');
+
+  // build context from current app state
+  let ctx = 'You are Lumi, a friendly and encouraging AI tutor for kids aged 5-15 in a home education app called LearnLand. The app has three tiers: Little Stars (ages 5-7), Explorers (ages 8-11), and Trailblazers (ages 12-15). Be warm, simple, and encouraging. Keep answers short and age-appropriate. Use emojis occasionally.';
+  const u = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if(u) ctx += ` The current user is ${u.fullName || u.username}.`;
+
+  tutorHistory.push({ role:'user', parts:[{text}] });
+
+  try{
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        system_instruction:{parts:[{text:ctx}]},
+        contents: tutorHistory
+      })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error?.message || 'API error');
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Hmm, I couldn\'t think of an answer. Try asking differently!';
+    tutorHistory.push({ role:'model', parts:[{text:reply}] });
+    typing.remove();
+    addTutorMsg('lumi', reply);
+  } catch(e){
+    typing.remove();
+    if(e.message.includes('API_KEY_INVALID')||e.message.includes('400')){
+      localStorage.removeItem(TUTOR_KEY_LS);
+      document.getElementById('tutorKeyRow').style.display='flex';
+      addTutorMsg('lumi','Hmm, that API key didn\'t work. Please check and re-enter it.');
+    } else {
+      addTutorMsg('lumi','Oops, something went wrong. Check your internet and try again!');
+    }
+  }
 }
 </script>
 </body>
