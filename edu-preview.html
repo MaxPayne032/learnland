@@ -57,6 +57,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 .tutor-key-input{flex:1;border:1px solid #e0e7ff;border-radius:8px;padding:.3rem .6rem;font-size:.75rem;outline:none;font-family:inherit;color:#555}
 .tutor-key-save{background:#4f46e5;color:white;border:none;border-radius:8px;padding:.3rem .7rem;font-size:.75rem;font-weight:700;cursor:pointer}
 .tutor-key-hint{font-size:.7rem;color:#9ca3af}
+.tutor-setup{background:#f5f3ff;border-radius:12px;padding:.8rem .9rem;margin:.75rem .75rem 0;font-size:.8rem;color:#4c1d95;line-height:1.6;border:1px solid #ddd6fe}
+.tutor-setup strong{display:block;margin-bottom:.35rem;font-size:.85rem}
+.tutor-setup ol{padding-left:1.1rem;margin:.2rem 0 .4rem}
+.tutor-setup a{color:#7c3aed;font-weight:700}
 
 /* ── TOP BAR ── */
 .topbar{background:rgba(79,70,229,.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:white;padding:.65rem 1.5rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 0 rgba(255,255,255,.08),0 4px 24px rgba(79,70,229,.35);position:sticky;top:0;z-index:100}
@@ -7803,6 +7807,16 @@ function printWorksheet(id){
     </div>
     <button class="tutor-close" onclick="toggleTutor()">✕</button>
   </div>
+  <div id="tutorSetup" class="tutor-setup" style="display:none">
+    <strong>🔑 One-time setup — it's free!</strong>
+    <ol>
+      <li>Go to <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></li>
+      <li>Sign in with a Google account</li>
+      <li>Click <strong>Create API key</strong></li>
+      <li>Copy it and paste it below</li>
+    </ol>
+    No credit card needed. Takes about 1 minute.
+  </div>
   <div class="tutor-messages" id="tutorMessages"></div>
   <div class="tutor-input-row">
     <input class="tutor-input" id="tutorInput" placeholder="Ask Lumi anything…" onkeydown="if(event.key==='Enter')sendTutorMsg()"/>
@@ -7836,8 +7850,8 @@ function toggleTutor(){
 
 function loadTutorKeyRow(){
   const key = localStorage.getItem(TUTOR_KEY_LS);
-  const row = document.getElementById('tutorKeyRow');
-  row.style.display = key ? 'none' : 'flex';
+  document.getElementById('tutorKeyRow').style.display = key ? 'none' : 'flex';
+  document.getElementById('tutorSetup').style.display = key ? 'none' : 'block';
 }
 
 function saveTutorKey(){
@@ -7845,6 +7859,7 @@ function saveTutorKey(){
   if(!val){ alert('Please paste your Gemini API key first.'); return; }
   localStorage.setItem(TUTOR_KEY_LS, val);
   document.getElementById('tutorKeyRow').style.display='none';
+  document.getElementById('tutorSetup').style.display='none';
   addTutorMsg('lumi','API key saved! I\'m ready to help you learn. Ask me anything 🎉');
 }
 
