@@ -6912,135 +6912,50 @@ function openParentReport(targetUser){
 // ══════════════════════════════════════════════
 // ANIMAL SOUNDS (Web Audio API synthesis)
 // ══════════════════════════════════════════════
+// Real animal sounds from Wikimedia Commons (free, public domain / CC)
+const ANIMAL_SOUND_URLS = {
+  'woof':   'https://upload.wikimedia.org/wikipedia/commons/2/2f/Bark%2C_dog%2C_2x.ogg',
+  'meow':   'https://upload.wikimedia.org/wikipedia/commons/0/0e/Cat_Meow_2.ogg',
+  'moo':    'https://upload.wikimedia.org/wikipedia/commons/d/d3/Cattle_mooing.ogg',
+  'oink':   'https://upload.wikimedia.org/wikipedia/commons/b/be/Pig_Oinking.ogg',
+  'baa':    'https://upload.wikimedia.org/wikipedia/commons/0/00/Sheep_baa.ogg',
+  'quack':  'https://upload.wikimedia.org/wikipedia/commons/c/c6/Mallard_duck_quacking.ogg',
+  'ribbit': 'https://upload.wikimedia.org/wikipedia/commons/1/18/Hyla_regilla_call.ogg',
+  'roar':   'https://upload.wikimedia.org/wikipedia/commons/a/a6/Lion_waiting_in_Namibia.ogg',
+  'neigh':  'https://upload.wikimedia.org/wikipedia/commons/d/d0/Neighing_of_a_horse.ogg',
+  'hiss':   'https://upload.wikimedia.org/wikipedia/commons/2/2a/Boa_constrictor_strigilatus_%28hissing%29.ogg',
+  'cock':   'https://upload.wikimedia.org/wikipedia/commons/5/58/Cock_a_doodle_doo.ogg',
+  'whoo':   'https://upload.wikimedia.org/wikipedia/commons/9/96/Tawny_owl.ogg',
+};
+
 function playAnimalSound(soundText, el){
-  try{
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const t = ctx.currentTime;
-    const s = soundText.toLowerCase();
+  const s = soundText.toLowerCase();
+  let key = null;
+  if(s.includes('woof'))  key='woof';
+  else if(s.includes('meow')||s.includes('meeow')) key='meow';
+  else if(s.includes('moo'))   key='moo';
+  else if(s.includes('oink'))  key='oink';
+  else if(s.includes('baa'))   key='baa';
+  else if(s.includes('quack')) key='quack';
+  else if(s.includes('ribbit'))key='ribbit';
+  else if(s.includes('roar'))  key='roar';
+  else if(s.includes('neigh')) key='neigh';
+  else if(s.includes('hiss'))  key='hiss';
+  else if(s.includes('cock')||s.includes('doodle')) key='cock';
+  else if(s.includes('whoo')||s.includes('whit'))   key='whoo';
 
-    // Helper: create gain node with ramp
-    function gainNode(val, attack, decay){
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(val, t + attack);
-      g.gain.exponentialRampToValueAtTime(0.001, t + attack + decay);
-      return g;
-    }
-    // Helper: oscillator burst
-    function osc(type, freq, startT, duration, gainVal){
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = type;
-      o.frequency.setValueAtTime(freq, ctx.currentTime);
-      g.gain.setValueAtTime(0, ctx.currentTime);
-      g.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + startT + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startT + duration);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(ctx.currentTime + startT);
-      o.stop(ctx.currentTime + startT + duration + 0.05);
-    }
-    // Helper: noise burst
-    function noise(filterFreq, filterQ, startT, duration, gainVal){
-      const bufLen = ctx.sampleRate * (duration + 0.05);
-      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-      const d = buf.getChannelData(0);
-      for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
-      const filt = ctx.createBiquadFilter();
-      filt.type = 'bandpass';
-      filt.frequency.value = filterFreq;
-      filt.Q.value = filterQ;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, ctx.currentTime);
-      g.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + startT + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startT + duration);
-      src.connect(filt); filt.connect(g); g.connect(ctx.destination);
-      src.start(ctx.currentTime + startT);
-    }
-    // Helper: sweep oscillator
-    function sweep(type, freqStart, freqEnd, startT, duration, gainVal){
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = type;
-      o.frequency.setValueAtTime(freqStart, ctx.currentTime + startT);
-      o.frequency.linearRampToValueAtTime(freqEnd, ctx.currentTime + startT + duration);
-      g.gain.setValueAtTime(0, ctx.currentTime);
-      g.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + startT + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startT + duration + 0.05);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(ctx.currentTime + startT);
-      o.stop(ctx.currentTime + startT + duration + 0.1);
-    }
+  const url = key ? ANIMAL_SOUND_URLS[key] : null;
+  if(el){ el.classList.add('playing'); setTimeout(()=>el.classList.remove('playing'),1500); }
 
-    if(s.includes('woof')){
-      // Dog: two noise bursts at bark frequency
-      noise(380, 2.5, 0,    0.18, 0.9);
-      noise(320, 2,   0.25, 0.2,  0.8);
-    } else if(s.includes('meow') || s.includes('meeow')){
-      // Cat: sweep from 700→400 with slight wobble
-      sweep('sine', 700, 380, 0, 0.5, 0.6);
-      osc('sine', 1400, 0, 0.5, 0.15);
-    } else if(s.includes('moo')){
-      // Cow: low sine + harmonic, long
-      osc('sine', 105, 0, 0.8, 0.7);
-      osc('sine', 210, 0, 0.8, 0.2);
-      osc('sine', 95,  0.15, 0.6, 0.3);
-    } else if(s.includes('oink')){
-      // Pig: two nasal chirps
-      sweep('sawtooth', 300, 220, 0,    0.15, 0.5);
-      sweep('sawtooth', 320, 240, 0.22, 0.15, 0.5);
-    } else if(s.includes('baa') || s.includes('baaa')){
-      // Sheep: tremolo-like sine
-      osc('sine', 420, 0, 0.4, 0.6);
-      osc('sine', 400, 0.1, 0.3, 0.3);
-      osc('sine', 440, 0.2, 0.3, 0.25);
-    } else if(s.includes('quack')){
-      // Duck: sharp chirp 900→500
-      sweep('square', 900, 500, 0,    0.13, 0.5);
-      sweep('square', 860, 480, 0.18, 0.12, 0.4);
-    } else if(s.includes('ribbit')){
-      // Frog: two low chirps
-      sweep('sine', 550, 700, 0,    0.12, 0.7);
-      sweep('sine', 540, 690, 0.22, 0.12, 0.6);
-    } else if(s.includes('roar')){
-      // Lion: low rumble noise + low tone
-      noise(90, 1.5, 0, 0.9, 1.0);
-      osc('sawtooth', 55, 0, 0.9, 0.4);
-    } else if(s.includes('neigh')){
-      // Horse: rising then falling sweep
-      sweep('sawtooth', 400, 1100, 0,    0.25, 0.7);
-      sweep('sawtooth', 1100, 600, 0.25, 0.35, 0.6);
-    } else if(s.includes('hiss')){
-      // Snake: filtered high noise
-      const bufLen = ctx.sampleRate * 0.7;
-      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-      const dd = buf.getChannelData(0);
-      for(let i=0;i<dd.length;i++) dd[i]=Math.random()*2-1;
-      const src = ctx.createBufferSource(); src.buffer = buf;
-      const hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=3000;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.7, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.65);
-      src.connect(hp); hp.connect(g); g.connect(ctx.destination);
-      src.start(ctx.currentTime);
-    } else if(s.includes('cock') || s.includes('doodle')){
-      // Rooster: three ascending chirps
-      sweep('sawtooth', 400,  800,  0,    0.2, 0.6);
-      sweep('sawtooth', 600,  1100, 0.25, 0.25, 0.6);
-      sweep('sawtooth', 800,  1400, 0.55, 0.3, 0.7);
-    } else if(s.includes('whoo') || s.includes('whit')){
-      // Owl: two descending hollow notes
-      osc('sine', 480, 0,    0.3, 0.6);
-      osc('sine', 360, 0.45, 0.4, 0.7);
-    } else {
-      // Fallback beep
-      osc('sine', 440, 0, 0.3, 0.5);
-    }
-
-    if(el){ el.classList.add('playing'); setTimeout(()=>el.classList.remove('playing'),700); }
-  } catch(e){
-    // Fallback to speech synthesis
+  if(url){
+    const audio = new Audio(url);
+    audio.onerror = () => {
+      if(window.speechSynthesis){ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(soundText)); }
+    };
+    audio.play().catch(()=>{
+      if(window.speechSynthesis){ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(soundText)); }
+    });
+  } else {
     if(window.speechSynthesis){ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(soundText)); }
   }
 }
