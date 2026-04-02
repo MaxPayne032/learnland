@@ -33,16 +33,16 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 #ai-tutor-btn{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(79,70,229,.5);display:flex;align-items:center;justify-content:center;font-size:1.6rem;transition:transform .2s,box-shadow .2s}
 #ai-tutor-btn:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(79,70,229,.6)}
 #ai-tutor-btn .notif-dot{position:absolute;top:4px;right:4px;width:12px;height:12px;background:#f59e0b;border-radius:50%;border:2px solid white;display:none}
-#ai-tutor-panel{position:fixed;bottom:5.5rem;right:1.5rem;z-index:998;width:340px;max-width:calc(100vw - 2rem);background:white;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.18);display:none;flex-direction:column;overflow:hidden;border:1.5px solid #e0e7ff}
+#ai-tutor-panel{position:fixed;bottom:5.5rem;right:1.5rem;z-index:998;width:340px;max-width:calc(100vw - 2rem);max-height:calc(100vh - 7rem);background:white;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.18);display:none;flex-direction:column;overflow:hidden;border:1.5px solid #e0e7ff}
 #ai-tutor-panel.open{display:flex}
-.tutor-header{background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:.85rem 1rem;display:flex;align-items:center;gap:.6rem;color:white}
+.tutor-header{background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:.85rem 1rem;display:flex;align-items:center;gap:.6rem;color:white;flex-shrink:0}
 .tutor-avatar{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
 .tutor-info{flex:1}
 .tutor-info strong{font-size:.95rem;display:block;font-weight:700}
 .tutor-info span{font-size:.72rem;opacity:.85}
 .tutor-close{background:none;border:none;color:white;cursor:pointer;font-size:1.2rem;padding:.2rem;opacity:.8;transition:opacity .15s}
 .tutor-close:hover{opacity:1}
-.tutor-messages{flex:1;overflow-y:auto;padding:.85rem;display:flex;flex-direction:column;gap:.6rem;max-height:340px;min-height:200px}
+.tutor-messages{flex:1;overflow-y:auto;padding:.85rem;display:flex;flex-direction:column;gap:.6rem;max-height:260px;min-height:80px}
 .tutor-msg{max-width:85%;padding:.55rem .85rem;border-radius:14px;font-size:.85rem;line-height:1.45;animation:msgIn .2s ease}
 @keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .tutor-msg.lumi{background:#ede9fe;color:#3b0764;border-bottom-left-radius:4px;align-self:flex-start}
@@ -57,7 +57,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 .tutor-key-input{flex:1;border:1px solid #e0e7ff;border-radius:8px;padding:.3rem .6rem;font-size:.75rem;outline:none;font-family:inherit;color:#555}
 .tutor-key-save{background:#4f46e5;color:white;border:none;border-radius:8px;padding:.3rem .7rem;font-size:.75rem;font-weight:700;cursor:pointer}
 .tutor-key-hint{font-size:.7rem;color:#9ca3af}
-.tutor-setup{background:#f5f3ff;border-radius:12px;padding:.8rem .9rem;margin:.75rem .75rem 0;font-size:.8rem;color:#4c1d95;line-height:1.6;border:1px solid #ddd6fe}
+.tutor-setup{background:#f5f3ff;border-radius:12px;padding:.8rem .9rem;margin:.75rem .75rem 0;font-size:.8rem;color:#4c1d95;line-height:1.6;border:1px solid #ddd6fe;flex-shrink:0}
 .tutor-setup strong{display:block;margin-bottom:.35rem;font-size:.85rem}
 .tutor-setup ol{padding-left:1.1rem;margin:.2rem 0 .4rem}
 .tutor-setup a{color:#7c3aed;font-weight:700}
