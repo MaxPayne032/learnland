@@ -449,6 +449,22 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 .geo-formula{background:#eef2ff;border-radius:8px;padding:.32rem .82rem;font-size:.86rem;font-weight:700;color:var(--brand);display:inline-block;margin:.2rem .2rem .2rem 0}
 .geo-calc{background:var(--green-light);border-radius:8px;padding:.32rem .82rem;font-size:.86rem;font-weight:700;color:#065f46;display:inline-block;margin:.2rem 0}
 .geo-drill{background:#fff7ed;border-radius:var(--radius);padding:1.25rem;margin:.75rem 0;border:1.5px solid #fed7aa}
+
+/* ── TEACHING JOURNAL ── */
+#tj-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:flex-end;justify-content:center}
+#tj-modal-overlay.open{display:flex}
+#tj-modal{background:white;border-radius:24px 24px 0 0;width:100%;max-width:540px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,.15)}
+.tj-type-pill{background:white;border:1.5px solid #e2e8f0;border-radius:100px;padding:.35rem .85rem;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .18s;color:#334155;font-family:inherit}
+.tj-type-pill.sel{background:#0d9488;color:white;border-color:#0d9488}
+.tj-cat-chip{background:white;border:1.5px solid #e2e8f0;border-radius:100px;padding:.3rem .75rem;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .18s;color:#334155;font-family:inherit}
+.tj-cat-chip.sel{background:#0d9488;color:white;border-color:#0d9488}
+.tj-child-btn{background:#f1f5f9;border:2px solid transparent;border-radius:100px;padding:.3rem .85rem;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .18s;color:#334155;font-family:inherit}
+.tj-child-btn.sel{background:#0d9488;color:white;border-color:#0d9488}
+.tj-tl-card{background:rgba(255,255,255,.88);border-radius:14px;padding:.85rem 1rem;box-shadow:0 2px 12px rgba(0,0,0,.08);font-size:.82rem;line-height:1.4;transition:transform .18s,box-shadow .18s;backdrop-filter:blur(4px)}
+.tj-tl-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.tj-tl-card.special{box-shadow:0 2px 14px rgba(234,179,8,.35);border:1.5px solid #fde68a}
+.tj-filter-tab{flex:1;border:none;border-radius:100px;padding:.42rem;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;background:transparent;color:#64748b;font-family:inherit}
+.tj-filter-tab.active{background:#0d9488;color:white}
 </style>
 </head>
 <body>
@@ -599,9 +615,34 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:va
 let currentGroup = null;
 let quizState    = {};
 let _prevScreen  = 'screen-home';
+let _tjFilter    = 'all';
+let _tjSelType   = null;
+let _tjSelCat    = null;
+let _tjSelChild  = null;
 
 const STORAGE_KEY  = 'learnland_v1';   // kept for legacy migration
 const USERS_KEY    = 'learnland_users';
+
+const TJ_ACTIVITY_TYPES = [
+  { id:'read',         label:'Read together',           emoji:'📚' },
+  { id:'built',        label:'Built or made something', emoji:'🔨' },
+  { id:'conversation', label:'Had a great conversation',emoji:'💬' },
+  { id:'practiced',    label:'Practiced a skill',       emoji:'🧠' },
+  { id:'walk',         label:'Nature walk / outdoors',  emoji:'🌿' },
+  { id:'watched',      label:'Watched &amp; discussed', emoji:'📺' },
+  { id:'wrote',        label:'Wrote something',         emoji:'✍️' },
+  { id:'cooked',       label:'Cooked or baked',         emoji:'🍳' },
+];
+
+const TJ_CATEGORIES = [
+  { id:'Maths',              emoji:'🔢', color:'--blue',   colorLight:'--blue-light'   },
+  { id:'English',            emoji:'📖', color:'--purple', colorLight:'--purple-light' },
+  { id:'Science',            emoji:'🔬', color:'--green',  colorLight:'--green-light'  },
+  { id:'Geography',          emoji:'🌍', color:'--orange', colorLight:'--orange-light' },
+  { id:'Arts & Crafts',      emoji:'🎨', color:'--pink',   colorLight:'--pink-light'   },
+  { id:'Physical Education', emoji:'⚽', color:'--yellow', colorLight:'--yellow-light' },
+  { id:'Other',              emoji:'✨', color:'--brand',  colorLight:'--blue-light'   },
+];
 let   activeUser   = null;
 
 // ── EmailJS config ──────────────────────────────
@@ -634,6 +675,134 @@ function exportAllData(){
   URL.revokeObjectURL(url);
 }
 
+function exportAsHTML(){
+  const users = loadUsers().filter(u => u.username !== '__parent');
+  const today = new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
+  const allLessonNames = LESSON_NAMES;
+
+  const childSections = users.map(u => {
+    const data     = JSON.parse(localStorage.getItem(getUserKey(u.username))||'{}');
+    const comp     = data.completed || {};
+    const sessions = data.sessions  || [];
+    const totalMins= sessions.reduce((a,b)=>a+(b.mins||0),0);
+    const daysActive= [...new Set(sessions.map(s=>s.date))].length;
+    const manualEntries = loadTeachLog(u.username).sort((a,b)=>a.date.localeCompare(b.date));
+    const manualMins = manualEntries.reduce((s,e)=>s+e.mins,0);
+    const age = u.dob ? Math.floor((new Date()-new Date(u.dob))/31557600000) : '?';
+
+    // aggregate app sessions by date
+    const byDate = {};
+    sessions.forEach(s=>{
+      if(!byDate[s.date]) byDate[s.date]={totalMins:0,lessons:{}};
+      byDate[s.date].totalMins += s.mins;
+      byDate[s.date].lessons[s.lessonId]=(byDate[s.date].lessons[s.lessonId]||0)+s.mins;
+    });
+    const sortedDates = Object.keys(byDate).sort();
+
+    const subjectRows = Object.entries(allLessonNames).map(([id,name])=>{
+      const pct  = comp[id]||0;
+      const mins = sessions.filter(s=>s.lessonId===id).reduce((a,b)=>a+b.mins,0);
+      const status = pct>=80?'Excellent':pct>=60?'Completed':pct>0?'In Progress':'Not Started';
+      const color  = pct>=60?'#f0fff4':'white';
+      return `<tr style="background:${color}">
+        <td>${name}</td><td style="text-align:center">${pct>0?pct+'%':'—'}</td>
+        <td style="text-align:center">${mins>0?mins+'min':'—'}</td><td>${status}</td>
+      </tr>`;
+    }).join('');
+
+    const appLogRows = sortedDates.map(date=>{
+      const d=byDate[date];
+      const lessonList=Object.entries(d.lessons).map(([id,m])=>`${allLessonNames[id]||id} (${m}min)`).join(', ');
+      return `<tr><td>${date}</td><td>${d.totalMins}min</td><td style="font-size:.85em;color:#555">${lessonList||'—'}</td></tr>`;
+    }).join('');
+
+    const manualRows = manualEntries.map(e=>{
+      const at = TJ_ACTIVITY_TYPES.find(a=>a.id===e.activityType);
+      return `<tr style="background:${e.special?'#fffbeb':'white'}">
+        <td>${e.date}${e.special?' ⭐':''}</td><td>${e.activity}</td>
+        <td>${e.category}${at?' · '+at.emoji+' '+at.label.replace(/&amp;/g,'&'):''}</td>
+        <td style="text-align:center">${e.mins}min</td>
+        <td style="color:#666;font-size:.85em">${e.notes||'—'}</td>
+      </tr>`;
+    }).join('');
+
+    return `
+      <div class="child-block">
+        <h2 class="child-name">${u.fullName||u.username} <span class="badge">${age} yrs</span></h2>
+        <div class="stat-row">
+          <div class="stat-box"><div class="stat-num">${(totalMins/60).toFixed(1)}h</div><div class="stat-lbl">App time</div></div>
+          <div class="stat-box"><div class="stat-num">${daysActive}</div><div class="stat-lbl">Days active</div></div>
+          <div class="stat-box"><div class="stat-num">${data.score||0}</div><div class="stat-lbl">Points</div></div>
+          <div class="stat-box"><div class="stat-num">${Object.values(comp).filter(p=>p>=60).length}/8</div><div class="stat-lbl">Lessons done</div></div>
+          <div class="stat-box teal"><div class="stat-num">${manualEntries.length}</div><div class="stat-lbl">Journal entries</div></div>
+          <div class="stat-box teal"><div class="stat-num">${(manualMins/60).toFixed(1)}h</div><div class="stat-lbl">Parent-led time</div></div>
+        </div>
+
+        <h3>📱 App Subject Progress</h3>
+        <table><tr class="thead"><th>Subject</th><th>Score</th><th>Time</th><th>Status</th></tr>${subjectRows}</table>
+
+        ${sortedDates.length ? `<h3>📅 App Daily Log</h3>
+        <table><tr class="thead"><th>Date</th><th>Duration</th><th>Subjects</th></tr>${appLogRows}</table>` : ''}
+
+        ${manualEntries.length ? `<h3>📓 Teaching Journal</h3>
+        <table><tr class="thead"><th>Date</th><th>Activity</th><th>Subject</th><th>Duration</th><th>Notes</th></tr>${manualRows}</table>` : ''}
+      </div>`;
+  }).join('<hr class="divider">');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LearnLand – Data Export ${today}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f0fdf4;color:#1e293b;padding:1.5rem}
+  .header{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;border-radius:16px;padding:1.75rem 2rem;margin-bottom:1.5rem}
+  .header h1{font-size:1.5rem;font-weight:900;margin-bottom:.25rem}
+  .header p{opacity:.8;font-size:.9rem}
+  .child-block{background:white;border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+  .child-name{font-size:1.3rem;font-weight:800;color:#0f172a;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+  .badge{background:#e0f2fe;color:#0369a1;border-radius:100px;padding:.2rem .7rem;font-size:.8rem;font-weight:700}
+  .stat-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem}
+  .stat-box{background:#f8faff;border-radius:12px;padding:.75rem 1rem;text-align:center;min-width:90px;border:1.5px solid #e2e8f0}
+  .stat-box.teal{background:#f0fdf4;border-color:#a7f3d0}
+  .stat-num{font-size:1.5rem;font-weight:900;color:#4f46e5}
+  .stat-box.teal .stat-num{color:#059669}
+  .stat-lbl{font-size:.72rem;color:#64748b;margin-top:.2rem}
+  h3{font-size:.95rem;font-weight:800;color:#374151;margin:1.25rem 0 .6rem;padding-left:.3rem;border-left:3px solid #0d9488}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:.5rem}
+  td,th{padding:.45rem .75rem;border:1px solid #e5e7eb;text-align:left}
+  .thead th{background:#4f46e5;color:white;font-weight:700}
+  tr:nth-child(even){background:#f9fafb}
+  .divider{border:none;border-top:2px dashed #d1d5db;margin:1.5rem 0}
+  .footer{text-align:center;font-size:.8rem;color:#94a3b8;margin-top:2rem;padding-top:1rem;border-top:1px solid #e2e8f0}
+  @media(max-width:600px){.stat-row{gap:.5rem}.stat-box{min-width:70px;padding:.6rem .7rem}.stat-num{font-size:1.2rem}}
+  @media print{body{background:white;padding:.5rem}.header{border-radius:8px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🌍 LearnLand — Data Export</h1>
+  <p>Generated: ${today} · ${users.length} child profile${users.length!==1?'s':''}</p>
+</div>
+${users.length === 0 ? '<p style="text-align:center;color:#64748b;padding:2rem">No child profiles found.</p>' : childSections}
+<div class="footer">
+  LearnLand Home Education App · This file can be opened in any web browser on any device.<br>
+  Generated: ${today}
+</div>
+</body>
+</html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `learnland-export-${new Date().toISOString().split('T')[0]}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function importData(){
   const input = document.createElement('input');
   input.type = 'file';
@@ -659,6 +828,9 @@ function importData(){
 }
 
 function getUserKey(u){ return 'learnland_v1_' + u; }
+function getTLKey(u){ return 'learnland_teachlog_' + u; }
+function loadTeachLog(u){ try{ return JSON.parse(localStorage.getItem(getTLKey(u)))||[]; }catch(e){ return []; } }
+function saveTeachLog(u,arr){ localStorage.setItem(getTLKey(u), JSON.stringify(arr)); }
 
 function loadState(){
   if(!activeUser) return {};
@@ -6783,8 +6955,26 @@ function openParentDashboard(){
         </div>
       </div>`;
     }).join('')}
+    <div id="tj-section" style="margin-bottom:1.25rem">
+      <div id="tj-toggle" onclick="toggleTJPanel()"
+        style="background:linear-gradient(135deg,#059669,#0d9488);color:white;border-radius:var(--radius);padding:1.25rem 1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 14px rgba(5,150,105,.28);user-select:none">
+        <div>
+          <div style="font-size:1.05rem;font-weight:800">📓 Teaching Journal</div>
+          <div style="font-size:.83rem;opacity:.88;margin-top:.15rem">Log reading sessions, walks, craft time &amp; more</div>
+        </div>
+        <span id="tj-chevron" style="font-size:1.4rem;transition:transform .2s">▾</span>
+      </div>
+      <div id="tj-panel-body" style="display:none;background:white;border:1.5px solid #a7f3d0;border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:1.25rem;box-shadow:var(--shadow-md)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+          <div style="font-size:.82rem;color:#64748b;font-weight:600">Your teaching moments, beautifully recorded</div>
+          <button onclick="openTJAddForm()" style="background:linear-gradient(135deg,#059669,#0d9488);color:white;border:none;border-radius:100px;padding:.5rem 1.25rem;font-size:.88rem;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(5,150,105,.28);font-family:inherit">➕ New Entry</button>
+        </div>
+        <div id="tj-list"></div>
+      </div>
+    </div>
     <div style="margin-top:1rem;display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center">
       <button onclick="openParentReport('__all')" style="background:#10b981;color:white;border:none;border-radius:10px;padding:.65rem 1.5rem;font-weight:700;cursor:pointer;font-size:.9rem">📋 Combined Report</button>
+      <button onclick="exportAsHTML()" style="background:#0d9488;color:white;border:none;border-radius:10px;padding:.65rem 1.5rem;font-weight:700;cursor:pointer;font-size:.9rem">🌐 Export as HTML</button>
       <button onclick="exportAllData()" style="background:#3b82f6;color:white;border:none;border-radius:10px;padding:.65rem 1.5rem;font-weight:700;cursor:pointer;font-size:.9rem">💾 Export Backup</button>
       <button onclick="importData()" style="background:#f97316;color:white;border:none;border-radius:10px;padding:.65rem 1.5rem;font-weight:700;cursor:pointer;font-size:.9rem">📂 Import Backup</button>
     </div>
@@ -6800,6 +6990,268 @@ function deleteChildAccount(username){
   localStorage.removeItem(getUserKey(username));
   openParentDashboard();
 }
+
+// ── TEACHING JOURNAL ─────────────────────────────────────────────────────────
+
+function toggleTJPanel(){
+  const body = document.getElementById('tj-panel-body');
+  const chevron = document.getElementById('tj-chevron');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  if(!isOpen) renderTJList(_tjFilter);
+}
+
+function formatTJDate(str){
+  const d = new Date(str + 'T00:00:00');
+  return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function renderTJList(filter){
+  filter = filter || _tjFilter || 'all';
+  _tjFilter = filter;
+  const listEl = document.getElementById('tj-list');
+  if(!listEl) return;
+
+  const users = loadUsers().filter(u => u.username !== '__parent');
+  const userMap = {};
+  users.forEach(u => { userMap[u.username] = u.fullName || u.username; });
+
+  let allEntries = [];
+  users.forEach(u => loadTeachLog(u.username).forEach(e => allEntries.push(e)));
+
+  // Time filter
+  const now = new Date();
+  if(filter !== 'all'){
+    const ref = new Date(now);
+    if(filter==='week')  ref.setDate(ref.getDate()-7);
+    if(filter==='month') ref.setMonth(ref.getMonth()-1);
+    if(filter==='year')  ref.setFullYear(ref.getFullYear()-1);
+    const cutoff = ref.toISOString().split('T')[0];
+    allEntries = allEntries.filter(e => e.date >= cutoff);
+  }
+
+  allEntries.sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+
+  // Filter tab bar
+  const tabs = ['all','week','month','year'].map(f =>
+    `<button class="tj-filter-tab${f===filter?' active':''}" onclick="renderTJList('${f}')">${f.charAt(0).toUpperCase()+f.slice(1)}</button>`
+  ).join('');
+  const tabBar = `<div style="display:flex;background:#f1f5f9;border-radius:100px;padding:.3rem;margin-bottom:1rem">${tabs}</div>`;
+
+  if(allEntries.length === 0){
+    listEl.innerHTML = tabBar + `<div style="text-align:center;padding:2.5rem 1rem;color:#94a3b8">
+      <div style="font-size:3rem;margin-bottom:.6rem">📓</div>
+      <div style="font-weight:700;font-size:.95rem;color:#475569">No sessions yet</div>
+      <div style="font-size:.82rem;margin-top:.3rem">Tap <strong>New Entry</strong> above to log your first moment!</div>
+    </div>`;
+    return;
+  }
+
+  const totalMins = allEntries.reduce((s,e) => s + e.mins, 0);
+  const statBar = `<div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">
+    <span style="background:#f0fdf4;color:#15803d;border-radius:100px;padding:.3rem .85rem;font-size:.78rem;font-weight:700">📓 ${allEntries.length} session${allEntries.length!==1?'s':''}</span>
+    <span style="background:#eff6ff;color:#1d4ed8;border-radius:100px;padding:.3rem .85rem;font-size:.78rem;font-weight:700">⏱️ ${totalMins} min total</span>
+    ${allEntries.some(e=>e.special)?`<span style="background:#fffbeb;color:#b45309;border-radius:100px;padding:.3rem .85rem;font-size:.78rem;font-weight:700">⭐ ${allEntries.filter(e=>e.special).length} special</span>`:''}
+  </div>`;
+
+  // Winding river timeline
+  const rows = allEntries.map((entry, i) => {
+    const cat = TJ_CATEGORIES.find(c => c.id === entry.category) || TJ_CATEGORIES[TJ_CATEGORIES.length-1];
+    const childName = userMap[entry.username] || entry.username;
+    const actType = TJ_ACTIVITY_TYPES.find(a => a.id === entry.activityType);
+    const isLeft = i % 2 === 0;
+
+    const card = `<div class="tj-tl-card${entry.special?' special':''}">
+      <div style="font-size:.7rem;font-weight:700;color:#94a3b8;margin-bottom:.35rem;letter-spacing:.02em">${formatTJDate(entry.date)}</div>
+      <div style="font-weight:800;font-size:.88rem;color:#0f172a;margin-bottom:.25rem">${entry.activity}${entry.special?' ⭐':''}</div>
+      ${actType ? `<div style="font-size:.72rem;color:#64748b;margin-bottom:.3rem">${actType.emoji} ${actType.label}</div>` : ''}
+      <div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.35rem">
+        <span style="background:var(${cat.colorLight});color:var(${cat.color});border-radius:100px;padding:.15rem .55rem;font-size:.7rem;font-weight:700">${cat.emoji} ${cat.id}</span>
+        <span style="background:#f0fdf4;color:#15803d;border-radius:100px;padding:.15rem .55rem;font-size:.7rem;font-weight:700">⏱️ ${entry.mins}min</span>
+      </div>
+      <div style="font-size:.72rem;color:#94a3b8;margin-bottom:.3rem">${childName}</div>
+      ${entry.notes ? `<div style="font-size:.76rem;color:#475569;font-style:italic;line-height:1.45;margin-bottom:.3rem">"${entry.notes}"</div>` : ''}
+      <div style="display:flex;gap:.3rem;justify-content:flex-end;margin-top:.4rem">
+        <button onclick="openTJEdit('${entry.id}','${entry.username}')" style="background:#f8faff;border:1px solid #e2e8f0;border-radius:8px;padding:.25rem .6rem;font-size:.7rem;font-weight:700;cursor:pointer;color:#475569;font-family:inherit">✏️</button>
+        <button onclick="deleteTJEntry('${entry.id}','${entry.username}')" style="background:#fff1f2;border:1px solid #fecaca;border-radius:8px;padding:.25rem .6rem;font-size:.7rem;font-weight:700;cursor:pointer;color:#ef4444;font-family:inherit">🗑️</button>
+      </div>
+    </div>`;
+
+    const icon = `<div style="display:flex;flex-direction:column;align-items:center;padding:.5rem 0;position:relative;z-index:2">
+      <div style="width:42px;height:42px;border-radius:50%;background:var(${cat.colorLight});border:2.5px solid var(${cat.color});display:flex;align-items:center;justify-content:center;font-size:1.25rem;box-shadow:0 2px 10px rgba(0,0,0,.12);flex-shrink:0">${cat.emoji}</div>
+    </div>`;
+
+    return isLeft
+      ? `<div style="grid-column:1;padding-right:.5rem">${card}</div><div style="grid-column:2">${icon}</div><div style="grid-column:3"></div>`
+      : `<div style="grid-column:1"></div><div style="grid-column:2">${icon}</div><div style="grid-column:3;padding-left:.5rem">${card}</div>`;
+  }).join('');
+
+  listEl.innerHTML = tabBar + statBar + `
+    <div style="background:linear-gradient(160deg,#ccfbf1 0%,#a7f3d0 45%,#99f6e4 100%);border-radius:16px;padding:1rem .25rem;position:relative;overflow:hidden">
+      <div style="position:absolute;left:50%;top:0;bottom:0;width:48px;transform:translateX(-50%);background:rgba(255,255,255,.42);border-radius:24px;z-index:1"></div>
+      <div style="display:grid;grid-template-columns:1fr 52px 1fr;position:relative;z-index:2;row-gap:.85rem">${rows}</div>
+    </div>`;
+}
+
+function _tjFormHTML(entry, users){
+  const today = new Date().toISOString().split('T')[0];
+  const firstUser = users[0]?.username || '';
+  const selCat = entry ? entry.category : (_tjSelCat || TJ_CATEGORIES[0].id);
+  const selType = entry ? (entry.activityType || null) : _tjSelType;
+  const selChild = entry ? entry.username : (_tjSelChild || firstUser);
+
+  return `
+    <!-- Date + child chips -->
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:1.1rem">
+      <div style="display:flex;align-items:center;gap:.35rem;background:#f1f5f9;border-radius:100px;padding:.35rem .9rem">
+        <span style="font-size:.85rem">📅</span>
+        <input id="tjf-date" type="date" value="${entry?entry.date:today}"
+          style="border:none;outline:none;font-family:inherit;font-size:.85rem;background:transparent;color:#0f172a"/>
+      </div>
+      ${users.map(u=>`<button class="tj-child-btn${u.username===selChild?' sel':''}" data-un="${u.username}" onclick="tjSelChild('${u.username}')">${(u.fullName||u.username).charAt(0).toUpperCase()} ${u.fullName||u.username}</button>`).join('')}
+    </div>
+
+    <!-- What did learning look like? -->
+    <div style="font-weight:800;font-size:.95rem;color:#0f172a;margin-bottom:.6rem">What did learning look like today?</div>
+    <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1rem">
+      ${TJ_ACTIVITY_TYPES.map(t=>`<button class="tj-type-pill${t.id===selType?' sel':''}" id="tjpill-${t.id}" onclick="tjSelType('${t.id}')">${t.emoji} ${t.label}</button>`).join('')}
+    </div>
+
+    <!-- Session title -->
+    <input id="tjf-activity" type="text" maxlength="80" placeholder="Give this session a title…" value="${entry?entry.activity.replace(/"/g,'&quot;'):''}"
+      style="width:100%;border:1.5px solid #e2e8f0;border-radius:12px;padding:.7rem 1rem;font-size:.9rem;font-family:inherit;outline:none;margin-bottom:.75rem;box-sizing:border-box;transition:border-color .2s"
+      onfocus="this.style.borderColor='#0d9488'" onblur="this.style.borderColor='#e2e8f0'"/>
+
+    <!-- Notes / describe progress -->
+    <textarea id="tjf-notes" rows="3" maxlength="500" placeholder="Describe the progress…"
+      style="width:100%;border:1.5px solid #e2e8f0;border-radius:12px;padding:.7rem 1rem;font-size:.88rem;font-family:inherit;resize:vertical;outline:none;margin-bottom:.75rem;box-sizing:border-box;transition:border-color .2s"
+      onfocus="this.style.borderColor='#0d9488'" onblur="this.style.borderColor='#e2e8f0'">${entry?entry.notes||'':''}</textarea>
+
+    <!-- Duration -->
+    <input id="tjf-mins" type="number" min="1" max="480" placeholder="Duration in minutes (e.g. 30)" value="${entry?entry.mins:''}"
+      style="width:100%;border:1.5px solid #e2e8f0;border-radius:12px;padding:.7rem 1rem;font-size:.9rem;font-family:inherit;outline:none;margin-bottom:1rem;box-sizing:border-box;transition:border-color .2s"
+      onfocus="this.style.borderColor='#0d9488'" onblur="this.style.borderColor='#e2e8f0'"/>
+
+    <!-- Choose a Topic -->
+    <div style="font-weight:800;font-size:.9rem;color:#0f172a;margin-bottom:.5rem">Choose a Topic</div>
+    <div style="font-size:.75rem;color:#94a3b8;margin-bottom:.5rem">Tap to select the subject area</div>
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem">
+      ${TJ_CATEGORIES.map(c=>`<button class="tj-cat-chip${c.id===selCat?' sel':''}" id="tjchip-${c.id.replace(/[\s&]/g,'_')}" onclick="tjSelCat('${c.id}')">${c.emoji} ${c.id}</button>`).join('')}
+    </div>
+
+    <!-- Mark as Special -->
+    <label style="display:flex;align-items:center;gap:.75rem;background:#fffbeb;border:1.5px solid #fde68a;border-radius:14px;padding:.85rem 1rem;cursor:pointer;margin-bottom:.75rem">
+      <span style="font-size:1.4rem">⭐</span>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:.88rem;color:#0f172a">Mark as Special</div>
+        <div style="font-size:.75rem;color:#78716c;margin-top:.15rem">Highlight a spontaneous achievement or breakthrough</div>
+      </div>
+      <input type="checkbox" id="tjf-special" ${entry&&entry.special?'checked':''} style="width:20px;height:20px;accent-color:#0d9488;cursor:pointer;flex-shrink:0"/>
+    </label>
+
+    <div id="tjf-err" style="color:#ef4444;font-size:.82rem;font-weight:700;min-height:1rem"></div>`;
+}
+
+function openTJAddForm(){
+  const users = loadUsers().filter(u => u.username !== '__parent');
+  _tjSelType = null;
+  _tjSelCat = TJ_CATEGORIES[0].id;
+  _tjSelChild = users[0]?.username || null;
+  const modal = document.getElementById('tj-modal');
+  modal.dataset.mode = 'add';
+  document.getElementById('tj-modal-title').textContent = 'New Entry';
+  document.getElementById('tj-modal-body').innerHTML = _tjFormHTML(null, users);
+  document.getElementById('tj-modal-overlay').classList.add('open');
+}
+
+function openTJEdit(id, username){
+  const entries = loadTeachLog(username);
+  const entry = entries.find(e => e.id === id);
+  if(!entry) return;
+  const users = loadUsers().filter(u => u.username !== '__parent');
+  _tjSelType = entry.activityType || null;
+  _tjSelCat = entry.category;
+  _tjSelChild = username;
+  const modal = document.getElementById('tj-modal');
+  modal.dataset.mode = 'edit';
+  modal.dataset.tjId = id;
+  modal.dataset.tjUsername = username;
+  document.getElementById('tj-modal-title').textContent = 'Edit Entry';
+  document.getElementById('tj-modal-body').innerHTML = _tjFormHTML(entry, users);
+  document.getElementById('tj-modal-overlay').classList.add('open');
+}
+
+function tjSelType(id){
+  _tjSelType = _tjSelType === id ? null : id;
+  TJ_ACTIVITY_TYPES.forEach(t => {
+    const btn = document.getElementById('tjpill-' + t.id);
+    if(btn){ btn.classList.toggle('sel', t.id === _tjSelType); }
+  });
+}
+
+function tjSelCat(id){
+  _tjSelCat = id;
+  TJ_CATEGORIES.forEach(c => {
+    const btn = document.getElementById('tjchip-' + c.id.replace(/[\s&]/g,'_'));
+    if(btn){ btn.classList.toggle('sel', c.id === id); }
+  });
+}
+
+function tjSelChild(username){
+  _tjSelChild = username;
+  document.querySelectorAll('.tj-child-btn').forEach(btn => {
+    btn.classList.toggle('sel', btn.dataset.un === username);
+  });
+}
+
+function saveTJModal(){
+  const modal = document.getElementById('tj-modal');
+  const mode  = modal.dataset.mode;
+  const activity = (document.getElementById('tjf-activity').value||'').trim();
+  const date     = document.getElementById('tjf-date').value;
+  const mins     = parseInt(document.getElementById('tjf-mins').value, 10);
+  const notes    = (document.getElementById('tjf-notes').value||'').trim();
+  const special  = document.getElementById('tjf-special').checked;
+  const category = _tjSelCat || TJ_CATEGORIES[0].id;
+  const activityType = _tjSelType;
+  const username = _tjSelChild || loadUsers().filter(u=>u.username!=='__parent')[0]?.username;
+  const errEl    = document.getElementById('tjf-err');
+
+  if(!activity){ errEl.textContent = 'Please enter a session title.'; return; }
+  if(!date || isNaN(new Date(date))){ errEl.textContent = 'Please choose a valid date.'; return; }
+  if(!mins || mins < 1 || mins > 480){ errEl.textContent = 'Duration must be between 1 and 480 minutes.'; return; }
+
+  errEl.textContent = '';
+
+  if(mode === 'add'){
+    const entries = loadTeachLog(username);
+    entries.push({ id:'tj_'+Date.now(), username, activity, category, activityType, mins, date, notes, special });
+    saveTeachLog(username, entries);
+  } else {
+    const id = modal.dataset.tjId;
+    const origUser = modal.dataset.tjUsername;
+    const entries = loadTeachLog(origUser);
+    const idx = entries.findIndex(e => e.id === id);
+    if(idx > -1) entries[idx] = { ...entries[idx], activity, category, activityType, mins, date, notes, special };
+    saveTeachLog(origUser, entries);
+  }
+
+  closeTJModal();
+  renderTJList(_tjFilter);
+}
+
+function deleteTJEntry(id, username){
+  if(!confirm('Remove this session from the journal?')) return;
+  saveTeachLog(username, loadTeachLog(username).filter(e => e.id !== id));
+  renderTJList(_tjFilter);
+}
+
+function closeTJModal(){
+  document.getElementById('tj-modal-overlay').classList.remove('open');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 function openParentReport(targetUser){
   const reportUsers = targetUser === '__all'
@@ -6830,9 +7282,20 @@ function openParentReport(targetUser){
     });
     const sortedDates = Object.keys(byDate).sort();
 
-    const curriculumStatement = doneLessons.length > 0
-      ? `${u.fullName||u.username} (age ${age}) is receiving suitable home education covering: ${doneLessons.map(([,n])=>n).join(', ')}. Education is matched to the child's age, ability and aptitude as evidenced by the assessment scores recorded below. This report is provided as evidence of elective home education under the Children's Wellbeing and Schools Bill 2024-25.`
-      : `${u.fullName||u.username} (age ${age}) has recently started their home education journey. Learning sessions have been recorded and progress is being tracked. This report is provided as evidence of elective home education under the Children's Wellbeing and Schools Bill 2024-25.`;
+    // Manual teaching log entries
+    const manualEntries = loadTeachLog(u.username).sort((a,b) => a.date.localeCompare(b.date));
+    const manualMins    = manualEntries.reduce((s,e) => s + e.mins, 0);
+    const manualCats    = [...new Set(manualEntries.map(e => e.category))];
+
+    const curriculumBase = doneLessons.length > 0
+      ? `${u.fullName||u.username} (age ${age}) is receiving suitable home education covering: ${doneLessons.map(([,n])=>n).join(', ')}.`
+      : `${u.fullName||u.username} (age ${age}) has recently started their home education journey.`;
+    const curriculumManual = manualCats.length > 0
+      ? ` Additionally, parent-led sessions covering ${manualCats.join(', ')} have been recorded.`
+      : '';
+    const curriculumStatement = curriculumBase + curriculumManual + (doneLessons.length > 0
+      ? ' Education is matched to the child\'s age, ability and aptitude as evidenced by the assessment scores recorded below. This report is provided as evidence of elective home education under the Children\'s Wellbeing and Schools Bill 2024-25.'
+      : ' Learning sessions have been recorded and progress is being tracked. This report is provided as evidence of elective home education under the Children\'s Wellbeing and Schools Bill 2024-25.');
 
     return `
       <div class="child-section" style="page-break-after:always">
@@ -6877,6 +7340,30 @@ function openParentReport(targetUser){
             return `<tr><td style="padding:.5rem .75rem;border:1px solid #ddd">${date}</td><td style="padding:.5rem .75rem;border:1px solid #ddd">${d.totalMins} min</td><td style="padding:.5rem .75rem;border:1px solid #ddd;font-size:.85rem">${lessonList||'—'}</td></tr>`;
           }).join('')}
         </table>` : '<p style="color:#6b7280;margin-bottom:1.5rem">No sessions recorded yet. Sessions are automatically logged when your child studies.</p>'}
+
+        <h2 style="color:#4f46e5;border-bottom:3px solid #4f46e5;padding-bottom:.4rem;margin-bottom:.75rem">Section 5b – Parent-Led Teaching Sessions</h2>
+        ${manualEntries.length ? `
+        <p style="font-size:.88rem;color:#6b7280;margin-bottom:.75rem">
+          Additional teaching sessions conducted by the parent outside of the app — total: <strong>${manualMins} minutes</strong> across ${manualEntries.length} session${manualEntries.length!==1?'s':''}.
+        </p>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem">
+          <tr style="background:#4f46e5;color:white">
+            <th style="padding:.5rem .75rem;text-align:left">Date</th>
+            <th style="padding:.5rem .75rem;text-align:left">Activity</th>
+            <th style="padding:.5rem .75rem;text-align:left">Subject</th>
+            <th style="padding:.5rem .75rem;text-align:center">Duration</th>
+            <th style="padding:.5rem .75rem;text-align:left">Notes</th>
+          </tr>
+          ${manualEntries.map(e=>{
+            const at = TJ_ACTIVITY_TYPES.find(a=>a.id===e.activityType);
+            return `<tr style="background:${e.special?'#fffbeb':'white'}">
+              <td style="padding:.5rem .75rem;border:1px solid #ddd;white-space:nowrap">${e.date}${e.special?' ⭐':''}</td>
+              <td style="padding:.5rem .75rem;border:1px solid #ddd">${e.activity}</td>
+              <td style="padding:.5rem .75rem;border:1px solid #ddd">${e.category}${at?` · ${at.emoji} ${at.label.replace(/&amp;/g,'&')}`:''}</td>
+              <td style="padding:.5rem .75rem;border:1px solid #ddd;text-align:center">${e.mins} min</td>
+              <td style="padding:.5rem .75rem;border:1px solid #ddd;font-size:.83rem;color:#6b7280">${e.notes||'—'}</td>
+            </tr>`;}).join('')}
+        </table>` : '<p style="color:#6b7280;margin-bottom:1.5rem">No parent-led sessions logged for this child.</p>'}
 
         <h2 style="color:#4f46e5;border-bottom:3px solid #4f46e5;padding-bottom:.4rem;margin-bottom:.75rem">Section 6 – Evidence of Progress</h2>
         ${Object.entries(comp).length ? `<table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem">
@@ -7868,5 +8355,17 @@ async function sendTutorMsg(){
   }
 }
 </script>
+
+<!-- ══ TEACHING JOURNAL MODAL (bottom sheet) ══ -->
+<div id="tj-modal-overlay">
+  <div id="tj-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;border-bottom:1px solid #f1f5f9;flex-shrink:0">
+      <button onclick="closeTJModal()" style="background:none;border:1.5px solid #e2e8f0;border-radius:100px;padding:.32rem .9rem;font-size:.85rem;font-weight:600;cursor:pointer;color:#64748b;font-family:inherit">Cancel</button>
+      <span id="tj-modal-title" style="font-weight:800;font-size:1rem;color:#0f172a">New Entry</span>
+      <button onclick="saveTJModal()" style="background:#0d9488;color:white;border:none;border-radius:100px;padding:.32rem .9rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit">Save</button>
+    </div>
+    <div id="tj-modal-body" style="overflow-y:auto;padding:1.25rem 1.4rem;flex:1"></div>
+  </div>
+</div>
 </body>
 </html>
