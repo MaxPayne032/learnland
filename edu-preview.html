@@ -718,9 +718,10 @@ function exportAsHTML(){
 
     const manualRows = manualEntries.map(e=>{
       const at = TJ_ACTIVITY_TYPES.find(a=>a.id===e.activityType);
+      const atLabel = at ? (' · '+at.emoji+' '+at.label.replace(/&amp;/g,'&')) : (e.activityType&&e.activityType.startsWith('other:') ? ' · ✨ '+e.activityType.slice(6) : '');
       return `<tr style="background:${e.special?'#fffbeb':'white'}">
         <td>${e.date}${e.special?' ⭐':''}</td><td>${e.activity}</td>
-        <td>${e.category}${at?' · '+at.emoji+' '+at.label.replace(/&amp;/g,'&'):''}</td>
+        <td>${e.category}${atLabel}</td>
         <td style="text-align:center">${e.mins}min</td>
         <td style="color:#666;font-size:.85em">${e.notes||'—'}</td>
       </tr>`;
@@ -7060,12 +7061,13 @@ function renderTJList(filter){
     const cat = TJ_CATEGORIES.find(c => c.id === entry.category) || TJ_CATEGORIES[TJ_CATEGORIES.length-1];
     const childName = userMap[entry.username] || entry.username;
     const actType = TJ_ACTIVITY_TYPES.find(a => a.id === entry.activityType);
+    const actTypeLabel = actType ? `${actType.emoji} ${actType.label}` : (entry.activityType && entry.activityType.startsWith('other:') ? `✨ ${entry.activityType.slice(6)}` : '');
     const isLeft = i % 2 === 0;
 
     const card = `<div class="tj-tl-card${entry.special?' special':''}">
       <div style="font-size:.7rem;font-weight:700;color:#94a3b8;margin-bottom:.35rem;letter-spacing:.02em">${formatTJDate(entry.date)}</div>
       <div style="font-weight:800;font-size:.88rem;color:#0f172a;margin-bottom:.25rem">${entry.activity}${entry.special?' ⭐':''}</div>
-      ${actType ? `<div style="font-size:.72rem;color:#64748b;margin-bottom:.3rem">${actType.emoji} ${actType.label}</div>` : ''}
+      ${actTypeLabel ? `<div style="font-size:.72rem;color:#64748b;margin-bottom:.3rem">${actTypeLabel}</div>` : ''}
       <div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.35rem">
         <span style="background:var(${cat.colorLight});color:var(${cat.color});border-radius:100px;padding:.15rem .55rem;font-size:.7rem;font-weight:700">${cat.emoji} ${cat.id}</span>
         <span style="background:#f0fdf4;color:#15803d;border-radius:100px;padding:.15rem .55rem;font-size:.7rem;font-weight:700">⏱️ ${entry.mins}min</span>
@@ -7114,9 +7116,13 @@ function _tjFormHTML(entry, users){
 
     <!-- What did learning look like? -->
     <div style="font-weight:800;font-size:.95rem;color:#0f172a;margin-bottom:.6rem">What did learning look like today?</div>
-    <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1rem">
-      ${TJ_ACTIVITY_TYPES.map(t=>`<button class="tj-type-pill${t.id===selType?' sel':''}" id="tjpill-${t.id}" onclick="tjSelType('${t.id}')">${t.emoji} ${t.label}</button>`).join('')}
+    <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:.6rem">
+      ${TJ_ACTIVITY_TYPES.map(t=>`<button class="tj-type-pill${(t.id==='Other'?selType&&selType.startsWith('other:'):t.id===selType)?' sel':''}" id="tjpill-${t.id}" onclick="tjSelType('${t.id}')">${t.emoji} ${t.label}</button>`).join('')}
     </div>
+    <input id="tjf-other-text" type="text" maxlength="60" placeholder="Describe the activity…"
+      style="display:${selType&&selType.startsWith('other:')?'block':'none'};width:100%;border:1.5px solid #0d9488;border-radius:12px;padding:.6rem 1rem;font-size:.88rem;font-family:inherit;outline:none;margin-bottom:.75rem;box-sizing:border-box"
+      value="${selType&&selType.startsWith('other:')?selType.slice(6).replace(/"/g,'&quot;'):''}"
+    />
 
     <!-- Session title -->
     <input id="tjf-activity" type="text" maxlength="80" placeholder="Give this session a title…" value="${entry?entry.activity.replace(/"/g,'&quot;'):''}"
@@ -7183,11 +7189,21 @@ function openTJEdit(id, username){
 }
 
 function tjSelType(id){
-  _tjSelType = _tjSelType === id ? null : id;
+  const wasSelected = id === 'Other' ? (_tjSelType && _tjSelType.startsWith('other:')) : _tjSelType === id;
+  _tjSelType = wasSelected ? null : (id === 'Other' ? 'other:' : id);
   TJ_ACTIVITY_TYPES.forEach(t => {
     const btn = document.getElementById('tjpill-' + t.id);
-    if(btn){ btn.classList.toggle('sel', t.id === _tjSelType); }
+    if(btn){
+      const active = t.id === 'Other' ? (_tjSelType && _tjSelType.startsWith('other:')) : t.id === _tjSelType;
+      btn.classList.toggle('sel', !!active);
+    }
   });
+  const otherInput = document.getElementById('tjf-other-text');
+  if(otherInput){
+    const show = _tjSelType && _tjSelType.startsWith('other:');
+    otherInput.style.display = show ? 'block' : 'none';
+    if(show) otherInput.focus();
+  }
 }
 
 function tjSelCat(id){
@@ -7214,7 +7230,11 @@ function saveTJModal(){
   const notes    = (document.getElementById('tjf-notes').value||'').trim();
   const special  = document.getElementById('tjf-special').checked;
   const category = _tjSelCat || TJ_CATEGORIES[0].id;
-  const activityType = _tjSelType;
+  let activityType = _tjSelType;
+  if(activityType && activityType.startsWith('other:')){
+    const customText = (document.getElementById('tjf-other-text')?.value||'').trim();
+    activityType = customText ? 'other:' + customText : null;
+  }
   const username = _tjSelChild || loadUsers().filter(u=>u.username!=='__parent')[0]?.username;
   const errEl    = document.getElementById('tjf-err');
 
@@ -7356,10 +7376,11 @@ function openParentReport(targetUser){
           </tr>
           ${manualEntries.map(e=>{
             const at = TJ_ACTIVITY_TYPES.find(a=>a.id===e.activityType);
+            const atLabel = at ? ` · ${at.emoji} ${at.label.replace(/&amp;/g,'&')}` : (e.activityType&&e.activityType.startsWith('other:') ? ` · ✨ ${e.activityType.slice(6)}` : '');
             return `<tr style="background:${e.special?'#fffbeb':'white'}">
               <td style="padding:.5rem .75rem;border:1px solid #ddd;white-space:nowrap">${e.date}${e.special?' ⭐':''}</td>
               <td style="padding:.5rem .75rem;border:1px solid #ddd">${e.activity}</td>
-              <td style="padding:.5rem .75rem;border:1px solid #ddd">${e.category}${at?` · ${at.emoji} ${at.label.replace(/&amp;/g,'&')}`:''}</td>
+              <td style="padding:.5rem .75rem;border:1px solid #ddd">${e.category}${atLabel}</td>
               <td style="padding:.5rem .75rem;border:1px solid #ddd;text-align:center">${e.mins} min</td>
               <td style="padding:.5rem .75rem;border:1px solid #ddd;font-size:.83rem;color:#6b7280">${e.notes||'—'}</td>
             </tr>`;}).join('')}
