@@ -11436,6 +11436,303 @@ function _refreshPD(){
   };
 })();
 
+
+// ══════════════════════════════════════════════
+// EXTERNAL LINKS PER LESSON
+// ══════════════════════════════════════════════
+var LESSON_LINKS={
+  'stars-math':[
+    {t:'BBC Bitesize – Early Maths',u:'https://www.bbc.co.uk/bitesize/subjects/zjxhfg8',c:'#e63946',d:'Fun maths activities for early learners'},
+    {t:'Khan Academy Kids',u:'https://learn.khanacademy.org/khan-academy-kids/',c:'#14a085',d:'Free interactive maths games for young children'},
+    {t:'Coolmath4Kids',u:'https://www.coolmath4kids.com',c:'#f4a261',d:'Maths games, puzzles and quizzes'},
+    {t:'Math Playground',u:'https://www.mathplayground.com',c:'#457b9d',d:'Maths games and word problems for kids'},
+    {t:'Numberblocks – CBeebies',u:'https://www.bbc.co.uk/cbeebies/shows/numberblocks',c:'#8338ec',d:'Award-winning number learning show'}
+  ],
+  'stars-letters':[
+    {t:'BBC Bitesize – Early Literacy',u:'https://www.bbc.co.uk/bitesize/subjects/zv48q6f',c:'#e63946',d:'Letters, sounds and reading for beginners'},
+    {t:'Starfall – Learn to Read',u:'https://www.starfall.com',c:'#14a085',d:'Phonics and reading activities for young learners'},
+    {t:'Alphablocks – CBeebies',u:'https://www.bbc.co.uk/cbeebies/shows/alphablocks',c:'#f4a261',d:'Animated letters that teach phonics'},
+    {t:'Oxford Owl – Free eBooks',u:'https://www.oxfordowl.co.uk/for-home/find-a-book/library-page',c:'#457b9d',d:'Free children\'s reading books online'},
+    {t:'Phonics Play',u:'https://www.phonicsplay.co.uk',c:'#8338ec',d:'Interactive phonics games and resources'}
+  ],
+  'stars-animals':[
+    {t:'National Geographic Kids – Animals',u:'https://kids.nationalgeographic.com/animals',c:'#e63946',d:'Facts, photos and videos about every animal'},
+    {t:'San Diego Zoo Kids',u:'https://kids.sandiegozoo.org',c:'#14a085',d:'Animal facts and games from the world-famous zoo'},
+    {t:'BBC Bitesize – Living Things',u:'https://www.bbc.co.uk/bitesize/topics/z6882hv',c:'#f4a261',d:'Learn about animals and their habitats'},
+    {t:'RSPB – Learn About Birds',u:'https://www.rspb.org.uk/birds-and-wildlife/wildlife-guides/bird-a-z',c:'#457b9d',d:'Identify and learn about birds'},
+    {t:'DK Find Out – Animals',u:'https://www.dkfindout.com/uk/animals-and-nature',c:'#8338ec',d:'Stunning visuals and animal facts'}
+  ],
+  'stars-colors':[
+    {t:'Crayola – Colour Mixing',u:'https://www.crayola.com/featured/color-mixing-chart',c:'#e63946',d:'Learn how colours mix together'},
+    {t:'Tate Kids – Art & Colour',u:'https://www.tate.org.uk/kids',c:'#14a085',d:'Explore art and colour from the Tate gallery'},
+    {t:'BBC Bitesize – Light & Colour',u:'https://www.bbc.co.uk/bitesize/topics/z3tbwmn',c:'#f4a261',d:'Why we see colours and how light works'},
+    {t:'DK Find Out – Rainbows',u:'https://www.dkfindout.com/uk/science/light/rainbows',c:'#457b9d',d:'How rainbows and colour work'}
+  ],
+  'stars-weather':[
+    {t:'Met Office – Weather for Kids',u:'https://www.metoffice.gov.uk/weather/learn-about/weather/types-of-weather',c:'#e63946',d:'Types of weather explained for children'},
+    {t:'BBC Weather – Learn',u:'https://www.bbc.co.uk/weather/features/47936894',c:'#14a085',d:'How weather is forecast and what causes it'},
+    {t:'National Geographic – Weather',u:'https://kids.nationalgeographic.com/science/topic/weather',c:'#f4a261',d:'Weather facts and extreme weather explained'},
+    {t:'Climate Kids – NASA',u:'https://climatekids.nasa.gov/weather-climate',c:'#457b9d',d:'NASA explains weather and climate for kids'}
+  ],
+  'stars-body':[
+    {t:'BBC Bitesize – Human Body',u:'https://www.bbc.co.uk/bitesize/topics/zcyycdm',c:'#e63946',d:'Learn about your body\'s organs and systems'},
+    {t:'DK Find Out – Human Body',u:'https://www.dkfindout.com/uk/human-body',c:'#14a085',d:'Interactive guide to the human body'},
+    {t:'Nemours KidsHealth',u:'https://kidshealth.org/en/kids/body',c:'#f4a261',d:'How your body works, explained for kids'},
+    {t:'National Geographic Kids – Body',u:'https://kids.nationalgeographic.com/science/topic/human-body',c:'#457b9d',d:'Amazing facts about the human body'}
+  ],
+  'stars-food':[
+    {t:'BBC Good Food – Kids',u:'https://www.bbcgoodfood.com/howto/guide/cooking-kids',c:'#e63946',d:'Simple recipes and food facts for children'},
+    {t:'Change4Life – Eat Well',u:'https://www.nhs.uk/change4life/food-facts',c:'#14a085',d:'NHS guide to healthy eating for kids'},
+    {t:'National Geographic – Food',u:'https://kids.nationalgeographic.com/food',c:'#f4a261',d:'Where food comes from around the world'},
+    {t:'Eat Seasonably',u:'https://eatseasonably.co.uk',c:'#457b9d',d:'Learn which foods grow in each season'}
+  ],
+  'stars-community':[
+    {t:'BBC Bitesize – Relationships',u:'https://www.bbc.co.uk/bitesize/topics/zq98f82',c:'#e63946',d:'People in our community and how we help each other'},
+    {t:'PSHE Association',u:'https://pshe-association.org.uk/pupils',c:'#14a085',d:'Community and citizenship resources'},
+    {t:'Childline',u:'https://www.childline.org.uk/info-advice/school-college-and-work',c:'#f4a261',d:'Understanding the world around you'},
+    {t:'Twinkl – Community Helpers',u:'https://www.twinkl.co.uk/resources/ks1-subjects/ks1-pshe/ks1-community',c:'#457b9d',d:'Learn about jobs and community roles'}
+  ],
+  'stars-time':[
+    {t:'BBC Bitesize – Telling the Time',u:'https://www.bbc.co.uk/bitesize/topics/zknd4wx',c:'#e63946',d:'Learn to read clocks and understand time'},
+    {t:'Topmarks – Teaching Clock',u:'https://www.topmarks.co.uk/time/teaching-clock',c:'#14a085',d:'Interactive clock for practising time'},
+    {t:'Math is Fun – Time',u:'https://www.mathsisfun.com/time.html',c:'#f4a261',d:'Understanding hours, minutes and seconds'}
+  ],
+  'stars-plants':[
+    {t:'BBC Bitesize – Plants',u:'https://www.bbc.co.uk/bitesize/topics/zpxnyrd',c:'#e63946',d:'How plants grow and what they need'},
+    {t:'RHS – School Gardening',u:'https://schoolgardening.rhs.org.uk',c:'#14a085',d:'Grow your own plants with the RHS'},
+    {t:'National Geographic – Plants',u:'https://kids.nationalgeographic.com/nature/topic/plants',c:'#f4a261',d:'Amazing plant facts and photos'},
+    {t:'DK Find Out – Plants',u:'https://www.dkfindout.com/uk/animals-and-nature/plants',c:'#457b9d',d:'How plants live, grow and reproduce'}
+  ],
+  'stars-music':[
+    {t:'BBC Ten Pieces',u:'https://www.bbc.co.uk/teach/ten-pieces',c:'#e63946',d:'Explore classical music with the BBC'},
+    {t:'Dallas Symphony Kids',u:'https://www.mydso.com/dso-kids',c:'#14a085',d:'Learn about instruments and composers'},
+    {t:'Classics for Kids',u:'https://www.classicsforkids.com',c:'#f4a261',d:'Composer biographies and music games'},
+    {t:'Incredibox',u:'https://www.incredibox.com',c:'#457b9d',d:'Create your own music mixes online'}
+  ],
+  'stars-transport':[
+    {t:'BBC Bitesize – Transport',u:'https://www.bbc.co.uk/bitesize/topics/zkvv39q',c:'#e63946',d:'How we travel and types of transport'},
+    {t:'National Geographic Kids – Machines',u:'https://kids.nationalgeographic.com/science/topic/machines',c:'#14a085',d:'How vehicles and machines work'},
+    {t:'DK Find Out – Transport',u:'https://www.dkfindout.com/uk/history/transport',c:'#f4a261',d:'History of transport from horses to rockets'},
+    {t:'How Stuff Works – Cars',u:'https://auto.howstuffworks.com/under-the-hood/car-part.htm',c:'#457b9d',d:'How cars and engines work'}
+  ],
+  'exp-maths':[
+    {t:'Khan Academy – Maths',u:'https://www.khanacademy.org/math',c:'#14a085',d:'Free video lessons and exercises for every level'},
+    {t:'BBC Bitesize – Maths KS2',u:'https://www.bbc.co.uk/bitesize/subjects/z826n39',c:'#e63946',d:'Key Stage 2 maths topics and quizzes'},
+    {t:'Maths is Fun',u:'https://www.mathsisfun.com',c:'#f4a261',d:'Clear explanations, games and puzzles'},
+    {t:'Corbettmaths',u:'https://corbettmaths.com',c:'#457b9d',d:'Video tutorials and practice questions'},
+    {t:'NRICH – Enriching Maths',u:'https://nrich.maths.org/students',c:'#8338ec',d:'Challenging problems for curious learners'}
+  ],
+  'exp-science':[
+    {t:'BBC Bitesize – Science KS2',u:'https://www.bbc.co.uk/bitesize/subjects/z2pfb9q',c:'#e63946',d:'Forces, materials, living things and more'},
+    {t:'Khan Academy – Science',u:'https://www.khanacademy.org/science',c:'#14a085',d:'Comprehensive science video lessons'},
+    {t:'PhET Simulations',u:'https://phet.colorado.edu',c:'#f4a261',d:'Free interactive science simulations'},
+    {t:'Exploratorium',u:'https://www.exploratorium.edu/explore',c:'#457b9d',d:'Science experiments and activities'},
+    {t:'Science Kids',u:'https://www.sciencekids.co.nz',c:'#8338ec',d:'Fun science facts, experiments and games'}
+  ],
+  'exp-geo':[
+    {t:'National Geographic Kids – Geography',u:'https://kids.nationalgeographic.com/geography',c:'#e63946',d:'Countries, maps and geographic wonders'},
+    {t:'BBC Bitesize – Geography KS2',u:'https://www.bbc.co.uk/bitesize/subjects/zbkw2hv',c:'#14a085',d:'Human and physical geography topics'},
+    {t:'Google Earth',u:'https://earth.google.com/web',c:'#f4a261',d:'Explore the world in stunning 3D'},
+    {t:'Worldometers',u:'https://www.worldometers.info',c:'#457b9d',d:'Live world statistics — population, land area and more'},
+    {t:'CIA World Factbook',u:'https://www.cia.gov/the-world-factbook',c:'#8338ec',d:'Detailed facts on every country on Earth'}
+  ],
+  'exp-reading':[
+    {t:'Oxford Owl – Free eBooks',u:'https://www.oxfordowl.co.uk/for-home/find-a-book/library-page',c:'#e63946',d:'Hundreds of free levelled reading books'},
+    {t:'BBC Bitesize – English KS2',u:'https://www.bbc.co.uk/bitesize/subjects/zv48q6f',c:'#14a085',d:'Reading comprehension and grammar activities'},
+    {t:'Project Gutenberg',u:'https://www.gutenberg.org',c:'#f4a261',d:'60,000+ free classic books to read online'},
+    {t:'CommonLit – Free Texts',u:'https://www.commonlit.org',c:'#457b9d',d:'Reading passages with comprehension questions'},
+    {t:'StoryWeaver – Free Stories',u:'https://storyweaver.org.in',c:'#8338ec',d:'Thousands of free illustrated stories'}
+  ],
+  'exp-history':[
+    {t:'BBC Bitesize – History KS2',u:'https://www.bbc.co.uk/bitesize/subjects/zcw76sg',c:'#e63946',d:'Ancient civilisations, WWII, Victorian era and more'},
+    {t:'DK Find Out – History',u:'https://www.dkfindout.com/uk/history',c:'#14a085',d:'Visual history from ancient Egypt to modern times'},
+    {t:'History for Kids',u:'https://www.historyforkids.net',c:'#f4a261',d:'Child-friendly articles on world history'},
+    {t:'Smithsonian – History',u:'https://www.smithsonianmag.com/history',c:'#457b9d',d:'In-depth history articles and features'},
+    {t:'National Geographic – History',u:'https://kids.nationalgeographic.com/history',c:'#8338ec',d:'Historical events, people and discoveries'}
+  ],
+  'exp-coding':[
+    {t:'Scratch – Learn Coding',u:'https://scratch.mit.edu',c:'#e63946',d:'Create your own interactive stories and games'},
+    {t:'Code.org',u:'https://code.org/learn',c:'#14a085',d:'Free coding courses for all ages and levels'},
+    {t:'BBC Micro:bit',u:'https://microbit.org/get-started/user-guide/overview',c:'#f4a261',d:'Programme a real computer with Micro:bit'},
+    {t:'Khan Academy – Computing',u:'https://www.khanacademy.org/computing',c:'#457b9d',d:'HTML, CSS, JavaScript and computer science'},
+    {t:'CS First by Google',u:'https://csfirst.withgoogle.com',c:'#8338ec',d:'Fun computer science activities by Google'}
+  ],
+  'exp-climate':[
+    {t:'NASA Climate Kids',u:'https://climatekids.nasa.gov',c:'#e63946',d:'NASA explains climate change for young learners'},
+    {t:'BBC Bitesize – Climate Change',u:'https://www.bbc.co.uk/bitesize/topics/zkpp34j',c:'#14a085',d:'Causes, effects and solutions to climate change'},
+    {t:'National Geographic – Environment',u:'https://kids.nationalgeographic.com/nature/topic/environment',c:'#f4a261',d:'Environmental issues explained for kids'},
+    {t:'WWF – Climate Change',u:'https://www.wwf.org.uk/learn/wildlife-facts/climate-change',c:'#457b9d',d:'How climate change affects wildlife'},
+    {t:'TED-Ed – Climate',u:'https://ed.ted.com/search?qs=climate+change',c:'#8338ec',d:'Short animated lessons on climate topics'}
+  ],
+  'exp-myths':[
+    {t:'Mythopedia',u:'https://mythopedia.com',c:'#e63946',d:'Greek, Norse, Roman and Egyptian mythology'},
+    {t:'BBC Bitesize – Ancient Greece',u:'https://www.bbc.co.uk/bitesize/topics/z87tn39',c:'#14a085',d:'Greek gods, myths and ancient civilisation'},
+    {t:'National Geographic – Mythology',u:'https://kids.nationalgeographic.com/history/topic/mythology',c:'#f4a261',d:'Myths and legends from around the world'},
+    {t:'Britannica Kids – Mythology',u:'https://kids.britannica.com/students/article/mythology/276164',c:'#457b9d',d:'Encyclopaedia entries on world mythology'},
+    {t:'DK Find Out – Ancient Egypt',u:'https://www.dkfindout.com/uk/history/ancient-egypt',c:'#8338ec',d:'Egyptian gods, pharaohs and legends'}
+  ],
+  'exp-sport':[
+    {t:'BBC Sport – Sport Academy',u:'https://www.bbc.co.uk/cbbc/quizzes/sport',c:'#e63946',d:'Sports facts, quizzes and inspiration'},
+    {t:'Olympics – Education',u:'https://olympics.com/ioc/education',c:'#14a085',d:'Official Olympic educational resources'},
+    {t:'National Geographic Kids – Sports',u:'https://kids.nationalgeographic.com/sports',c:'#f4a261',d:'History and science behind popular sports'},
+    {t:'Youth Sport Trust',u:'https://www.youthsporttrust.org',c:'#457b9d',d:'Sports activities and resources for young people'},
+    {t:'Physics of Sport – ABC',u:'https://www.abc.net.au/science/sport',c:'#8338ec',d:'The science behind sport explained'}
+  ],
+  'exp-body':[
+    {t:'BBC Bitesize – Human Body KS2',u:'https://www.bbc.co.uk/bitesize/topics/zcyycdm',c:'#e63946',d:'Organs, senses and body systems'},
+    {t:'Khan Academy – Health & Medicine',u:'https://www.khanacademy.org/science/health-and-medicine',c:'#14a085',d:'How the body works in detail'},
+    {t:'Nemours KidsHealth',u:'https://kidshealth.org/en/kids/body',c:'#f4a261',d:'Body systems explained for kids'},
+    {t:'DK Find Out – Human Body',u:'https://www.dkfindout.com/uk/human-body',c:'#457b9d',d:'Interactive guide to every part of your body'},
+    {t:'Anatomy4Kids',u:'https://www.anatomy4kids.com',c:'#8338ec',d:'Labelled diagrams and anatomy explanations'}
+  ],
+  'exp-plants':[
+    {t:'BBC Bitesize – Plants KS2',u:'https://www.bbc.co.uk/bitesize/topics/zpxnyrd',c:'#e63946',d:'Life cycles, photosynthesis and plant parts'},
+    {t:'Royal Botanic Gardens Kew',u:'https://www.kew.org/read-and-watch/plants-fungi-algae-for-kids',c:'#14a085',d:'Plant science from the world-famous Kew Gardens'},
+    {t:'DK Find Out – Plants',u:'https://www.dkfindout.com/uk/animals-and-nature/plants',c:'#f4a261',d:'How plants grow, reproduce and survive'},
+    {t:'National Geographic – Plants',u:'https://kids.nationalgeographic.com/nature/topic/plants',c:'#457b9d',d:'Rainforests, flowers, trees and more'},
+    {t:'RHS – Gardening for Schools',u:'https://schoolgardening.rhs.org.uk/resources',c:'#8338ec',d:'Grow your own plants with the Royal Horticultural Society'}
+  ],
+  'exp-art':[
+    {t:'Tate Kids',u:'https://www.tate.org.uk/kids',c:'#e63946',d:'Explore art, artists and creative activities'},
+    {t:'Google Arts & Culture',u:'https://artsandculture.google.com',c:'#14a085',d:'Explore museums and artworks worldwide'},
+    {t:'MoMA Learning',u:'https://www.moma.org/learn/moma_learning',c:'#f4a261',d:'Learn about modern art from New York\'s MoMA'},
+    {t:'Artkids',u:'https://www.artkids.nl/en',c:'#457b9d',d:'Famous artists and art movements for children'},
+    {t:'National Gallery – Take One Picture',u:'https://www.nationalgallery.org.uk/take-one-picture',c:'#8338ec',d:'Explore paintings from the National Gallery'}
+  ],
+  'exp-languages':[
+    {t:'Duolingo',u:'https://www.duolingo.com',c:'#14a085',d:'Free language learning — Spanish, French and more'},
+    {t:'BBC Languages',u:'https://www.bbc.co.uk/languages',c:'#e63946',d:'Introduction to world languages from the BBC'},
+    {t:'Linguascope',u:'https://www.linguascope.com',c:'#f4a261',d:'Interactive language games for French, Spanish, German, Italian'},
+    {t:'Language Transfer – Free Audio',u:'https://www.languagetransfer.org',c:'#457b9d',d:'Free audio courses for Spanish, French, German and more'},
+    {t:'Forvo – Pronunciation Guide',u:'https://forvo.com',c:'#8338ec',d:'Hear any word pronounced by native speakers'}
+  ],
+  'exp-money':[
+    {t:'BBC Bitesize – Money KS2',u:'https://www.bbc.co.uk/bitesize/topics/zd8fv9q',c:'#e63946',d:'Understanding money, budgeting and finance basics'},
+    {t:'Young Money',u:'https://youngmoney.co.uk/resources',c:'#14a085',d:'Financial education resources for young people'},
+    {t:'Money Saving Expert – Kids',u:'https://www.moneysavingexpert.com/family/teaching-kids-about-money',c:'#f4a261',d:'How to teach children about managing money'},
+    {t:'Khan Academy – Personal Finance',u:'https://www.khanacademy.org/college-careers-more/personal-finance',c:'#457b9d',d:'Budgeting, saving and financial planning'},
+    {t:'Investopedia',u:'https://www.investopedia.com',c:'#8338ec',d:'Financial glossary and simple explanations'}
+  ],
+  'tb-math':[
+    {t:'Khan Academy – Advanced Maths',u:'https://www.khanacademy.org/math',c:'#14a085',d:'Algebra, geometry, calculus and statistics'},
+    {t:'BBC Bitesize – Maths GCSE',u:'https://www.bbc.co.uk/bitesize/subjects/z38pycw',c:'#e63946',d:'Full GCSE maths curriculum with videos and quizzes'},
+    {t:'Desmos Graphing Calculator',u:'https://www.desmos.com/calculator',c:'#f4a261',d:'Free online graphing calculator and maths tools'},
+    {t:'Wolfram Alpha',u:'https://www.wolframalpha.com',c:'#457b9d',d:'Compute answers, show steps, explore mathematics'},
+    {t:'3Blue1Brown',u:'https://www.3blue1brown.com',c:'#8338ec',d:'Beautiful visual explanations of advanced maths concepts'}
+  ],
+  'tb-physics':[
+    {t:'Khan Academy – Physics',u:'https://www.khanacademy.org/science/physics',c:'#14a085',d:'Mechanics, waves, electricity and modern physics'},
+    {t:'BBC Bitesize – Physics GCSE',u:'https://www.bbc.co.uk/bitesize/subjects/zpm6fg8',c:'#e63946',d:'Forces, energy, waves, atoms and space'},
+    {t:'PhET Simulations – Physics',u:'https://phet.colorado.edu/en/simulations/filter?subjects=physics',c:'#f4a261',d:'Interactive physics simulations from University of Colorado'},
+    {t:'HyperPhysics',u:'http://hyperphysics.phy-astr.gsu.edu/hbase/hframe.html',c:'#457b9d',d:'Comprehensive physics reference with concept maps'},
+    {t:'Veritasium – YouTube',u:'https://www.youtube.com/@veritasium',c:'#8338ec',d:'Mind-blowing physics and science explained on YouTube'}
+  ],
+  'tb-chemistry':[
+    {t:'Khan Academy – Chemistry',u:'https://www.khanacademy.org/science/chemistry',c:'#14a085',d:'Atoms, reactions, the periodic table and more'},
+    {t:'BBC Bitesize – Chemistry GCSE',u:'https://www.bbc.co.uk/bitesize/subjects/znxtyrd',c:'#e63946',d:'Atomic structure, bonding, reactions and analysis'},
+    {t:'Royal Society of Chemistry',u:'https://www.rsc.org/learn-chemistry',c:'#f4a261',d:'Chemistry resources, experiments and careers'},
+    {t:'ChemLibreTexts',u:'https://chem.libretexts.org',c:'#457b9d',d:'Free open-access chemistry textbooks and resources'},
+    {t:'RSC Periodic Table',u:'https://www.rsc.org/periodic-table',c:'#8338ec',d:'Interactive periodic table with element profiles'}
+  ],
+  'tb-biology':[
+    {t:'Khan Academy – Biology',u:'https://www.khanacademy.org/science/biology',c:'#14a085',d:'Cells, genetics, evolution, ecology and more'},
+    {t:'BBC Bitesize – Biology GCSE',u:'https://www.bbc.co.uk/bitesize/subjects/z9ddmp3',c:'#e63946',d:'Cells, transport, genetics, ecosystems and disease'},
+    {t:'HHMI BioInteractive',u:'https://www.biointeractive.org',c:'#f4a261',d:'Free biology videos, activities and data tools'},
+    {t:'Visible Body – Anatomy',u:'https://www.visiblebody.com/learn',c:'#457b9d',d:'Explore the human body in 3D'},
+    {t:'National Human Genome Research Institute',u:'https://www.genome.gov/For-Patients-and-Families/Education',c:'#8338ec',d:'Genetics and DNA explained for students'}
+  ],
+  'tb-english':[
+    {t:'BBC Bitesize – English GCSE',u:'https://www.bbc.co.uk/bitesize/subjects/zr9d7ty',c:'#e63946',d:'Literature, language, writing skills and analysis'},
+    {t:'Khan Academy – Grammar',u:'https://www.khanacademy.org/humanities/grammar',c:'#14a085',d:'Comprehensive English grammar lessons'},
+    {t:'SparkNotes',u:'https://www.sparknotes.com',c:'#f4a261',d:'Literature guides and analyses of major works'},
+    {t:'Poetry Foundation',u:'https://www.poetryfoundation.org/learn',c:'#457b9d',d:'Poetry for all ages with learning resources'},
+    {t:'Purdue OWL – Writing',u:'https://owl.purdue.edu/owl/purdue_owl.html',c:'#8338ec',d:'The definitive guide to English writing and grammar'}
+  ],
+  'tb-history':[
+    {t:'BBC Bitesize – History GCSE',u:'https://www.bbc.co.uk/bitesize/subjects/zj26n39',c:'#e63946',d:'WWI, WWII, Cold War, civil rights and more'},
+    {t:'Khan Academy – World History',u:'https://www.khanacademy.org/humanities/world-history',c:'#14a085',d:'World history from ancient civilisations to today'},
+    {t:'History.com',u:'https://www.history.com',c:'#f4a261',d:'In-depth articles and videos on historical events'},
+    {t:'Smithsonian Magazine – History',u:'https://www.smithsonianmag.com/history',c:'#457b9d',d:'Fascinating history stories and research'},
+    {t:'Crash Course History – YouTube',u:'https://www.youtube.com/@crashcourse',c:'#8338ec',d:'Entertaining and informative history video series'}
+  ],
+  'tb-geo':[
+    {t:'BBC Bitesize – Geography GCSE',u:'https://www.bbc.co.uk/bitesize/subjects/zkw76sg',c:'#e63946',d:'Physical and human geography for GCSE'},
+    {t:'Khan Academy – Human Geography',u:'https://www.khanacademy.org/humanities/ap-human-geography',c:'#14a085',d:'Human geography concepts and case studies'},
+    {t:'Google Earth',u:'https://earth.google.com/web',c:'#f4a261',d:'Explore the world\'s landscapes in stunning 3D'},
+    {t:'Our World in Data',u:'https://ourworldindata.org',c:'#457b9d',d:'Data-driven research on global issues — free and open'},
+    {t:'National Geographic Education',u:'https://education.nationalgeographic.org/resource/resource-library-geography',c:'#8338ec',d:'Geography resources, maps and articles'}
+  ],
+  'tb-cs':[
+    {t:'CS50 – Harvard Free Course',u:'https://cs50.harvard.edu/x',c:'#e63946',d:'World\'s most popular intro to computer science — free'},
+    {t:'Khan Academy – Computer Science',u:'https://www.khanacademy.org/computing/computer-science',c:'#14a085',d:'Algorithms, cryptography, information theory'},
+    {t:'freeCodeCamp',u:'https://www.freecodecamp.org',c:'#f4a261',d:'Learn HTML, CSS, JavaScript, Python and more for free'},
+    {t:'The Odin Project',u:'https://www.theodinproject.com',c:'#457b9d',d:'Free full-stack web development curriculum'},
+    {t:'Computerphile – YouTube',u:'https://www.youtube.com/@Computerphile',c:'#8338ec',d:'Computer science explained by University of Nottingham academics'}
+  ],
+  'tb-philosophy':[
+    {t:'BBC – A History of Ideas',u:'https://www.bbc.co.uk/programmes/articles/2L84BNqxXNL7DqcW3q7XGD/a-history-of-ideas',c:'#e63946',d:'Big philosophical ideas explained accessibly'},
+    {t:'Khan Academy – Philosophy',u:'https://www.khanacademy.org/humanities/philosophy',c:'#14a085',d:'Philosophy of mind, ethics, logic and knowledge'},
+    {t:'Philosophy Bites',u:'https://www.philosophybites.com',c:'#f4a261',d:'Short audio interviews with leading philosophers'},
+    {t:'Stanford Encyclopedia of Philosophy',u:'https://plato.stanford.edu',c:'#457b9d',d:'The most comprehensive philosophy reference online'},
+    {t:'Wi-Phi – YouTube',u:'https://www.youtube.com/@WirelessPhilosophy',c:'#8338ec',d:'Short videos introducing philosophical thinking'}
+  ],
+  'tb-economics':[
+    {t:'Khan Academy – Economics',u:'https://www.khanacademy.org/economics-finance-domain',c:'#14a085',d:'Micro, macro, finance and GDP explained'},
+    {t:'BBC Bitesize – Economics GCSE',u:'https://www.bbc.co.uk/bitesize/subjects/zm4c7ty',c:'#e63946',d:'Markets, supply & demand, fiscal policy'},
+    {t:'Our World in Data – Economics',u:'https://ourworldindata.org/economic-growth',c:'#f4a261',d:'Global economic data and research, free to explore'},
+    {t:'Investopedia',u:'https://www.investopedia.com',c:'#457b9d',d:'Clear explanations of every economic and financial term'},
+    {t:'Crash Course Economics – YouTube',u:'https://www.youtube.com/playlist?list=PL8dPuuaLjXtPNZwz5_o_5uirJ8gQXnhEO',c:'#8338ec',d:'Entertaining economics video series for students'}
+  ],
+  'tb-space':[
+    {t:'NASA – Space Place',u:'https://spaceplace.nasa.gov',c:'#14a085',d:'NASA\'s dedicated learning site for young space explorers'},
+    {t:'ESA – Space for Kids',u:'https://www.esa.int/kids/en/learn',c:'#e63946',d:'European Space Agency\'s educational resources'},
+    {t:'Khan Academy – Cosmology',u:'https://www.khanacademy.org/science/cosmology-and-astronomy',c:'#f4a261',d:'Stars, galaxies, black holes and the Big Bang'},
+    {t:'Stellarium – Online Planetarium',u:'https://stellarium-web.org',c:'#457b9d',d:'Free real-time star map for your location'},
+    {t:'National Geographic – Space',u:'https://kids.nationalgeographic.com/space',c:'#8338ec',d:'Planets, stars and space exploration for kids'}
+  ],
+  'tb-psychology':[
+    {t:'Khan Academy – Psychology',u:'https://www.khanacademy.org/science/ap-psychology',c:'#14a085',d:'Biological bases, memory, development and social psychology'},
+    {t:'BBC Bitesize – Psychology GCSE',u:'https://www.bbc.co.uk/bitesize/subjects/zmpfb9q',c:'#e63946',d:'Perception, memory, development, social influence'},
+    {t:'Simply Psychology',u:'https://www.simplypsychology.org',c:'#f4a261',d:'Clear psychology articles, studies and theories'},
+    {t:'TED Talks – Psychology',u:'https://www.ted.com/topics/psychology',c:'#457b9d',d:'Expert talks on how the mind and behaviour work'},
+    {t:'Crash Course Psychology – YouTube',u:'https://www.youtube.com/playlist?list=PL8dPuuaLjXtOPRKzVLY0jJY-uHOH9KVU6',c:'#8338ec',d:'40-episode psychology video series for students'}
+  ]
+};
+
+// ── Patch openLesson to append links section ──
+(function(){
+  var _orig=window.openLesson;
+  window.openLesson=function(id,title,icon,group){
+    _orig(id,title,icon,group);
+    var links=LESSON_LINKS[id];
+    if(!links||!links.length)return;
+    var content=document.getElementById('lessonContent');
+    if(!content)return;
+    var h='<div class="lesson-section" style="margin-top:1.5rem">'+
+      '<h3 style="display:flex;align-items:center;gap:.4rem">📚 Further Reading &amp; Resources</h3>'+
+      '<p style="font-size:.88rem;color:var(--muted);margin-bottom:.85rem">Explore these trusted websites to go deeper on this topic.</p>'+
+      '<div style="display:grid;gap:.55rem">';
+    links.forEach(function(l){
+      h+='<a href="'+l.u+'" target="_blank" rel="noopener noreferrer" '+
+        'style="display:flex;align-items:center;gap:.75rem;background:white;border-radius:12px;padding:.75rem 1rem;'+
+        'border:1.5px solid var(--border);text-decoration:none;transition:all .18s;box-shadow:var(--shadow-sm)" '+
+        'onmouseover="this.style.borderColor=\''+l.c+'\';this.style.transform=\'translateX(3px)\'" '+
+        'onmouseout="this.style.borderColor=\'var(--border)\';this.style.transform=\'none\'">'+
+        '<div style="width:38px;height:38px;border-radius:10px;background:'+l.c+'20;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+
+        '<svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke="'+l.c+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+        '</div>'+
+        '<div style="min-width:0">'+
+        '<div style="font-weight:700;font-size:.88rem;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+l.t+'</div>'+
+        '<div style="font-size:.77rem;color:var(--muted);margin-top:.1rem">'+l.d+'</div>'+
+        '</div>'+
+        '<div style="margin-left:auto;flex-shrink:0;font-size:.72rem;font-weight:700;color:white;background:'+l.c+';border-radius:100px;padding:.2rem .6rem">Visit →</div>'+
+        '</a>';
+    });
+    h+='</div></div>';
+    content.insertAdjacentHTML('beforeend',h);
+  };
+})();
+
 document.addEventListener('DOMContentLoaded',function(){
   var b=JSON.parse(localStorage.getItem('ll_tg_bests')||'{}');
   var el=document.getElementById('tgBest');
